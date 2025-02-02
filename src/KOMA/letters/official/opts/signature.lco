@@ -1,6 +1,6 @@
 \ProvidesFile{signature.lco}
 
-\input{../config_example.tex}
+\input{config_example.tex}
 
 %%
 %% SIGNATURE OPTIONS
