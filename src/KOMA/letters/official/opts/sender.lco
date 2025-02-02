@@ -1,0 +1,25 @@
+\ProvidesFile{sender.lco}
+
+%%
+%% SENDER OPTIONS
+%%
+
+% >>>>>>>>>>> Absenderangaben >>>>>>>>>>>
+\setkomavar{fromname}{\usekomavar{fromname}} % Name
+\setkomavar{fromaddress}{\usekomavar{fromaddress}} % Adresse
+\setkomavar{fromemail}[\Letter \hspace{.1cm}]{\usekomavar{fromemail}} % Email-Adresse
+\setkomavar{fromurl}[\Mundus \hspace{.1cm}]{\usekomavar{fromurl}} % Website
+
+\setkomavar{location}{%
+  \raggedright\footnotesize{%
+  \usekomavar{fromname}\\
+  \usekomavar{fromaddress}\\
+  \scriptsize{\textnormal{\usekomavar*{fromemail}\usekomavar{fromemail}}}\\
+  \scriptsize{\textnormal{\usekomavar*{fromurl}\usekomavar{fromurl}}}%
+  }
+}
+% <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+% >>>>>>>>>>> Logo >>>>>>>>>>>
+\setkomavar{fromlogo}{\usekomavar{fromlogo}}
+% <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

@@ -1,0 +1,24 @@
+\ProvidesFile{signature.lco}
+
+\input{../config_example.tex}
+
+%%
+%% SIGNATURE OPTIONS
+%%
+
+% >>>>>>>>>>> VARIABLES >>>>>>>>>>>
+\renewcommand*{\raggedsignature}{\raggedright} % Ausrichtung Signature
+
+\newkomavar{fromsignature}
+\setkomavar{fromsignature}{1. Vorsitzender}
+
+% >>>>>>>>>>> Signatur >>>>>>>>>>>
+\setkomavar{signature}{%
+  \includegraphics[height=1.5cm]{../assets/signature_example.png}\\
+  \usekomavar{fromchairman}\\
+  \scriptsize{(\textnormal{\usekomavar{fromsignature}})}%
+}
+% <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -1,0 +1,36 @@
+\ProvidesFile{footer.lco}
+
+%%
+%% FOOTER OPTIONS
+%%
+
+
+% >>>>>>>>>>> Fußbereich >>>>>>>>>>>
+\setkomavar{firstfoot}{\footer} % Footer auf der ersten Seite
+% <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+% >>>>>>>>>>> FOOTER >>>>>>>>>>>
+\newcommand{\footer}{%
+  \scriptsize{
+    \color{grau} % Setzt die Textfarbe auf Grau
+    \rule{165mm}{0.01pt} % Standardregel (schwarz)
+
+    \noindent % Verhindert Einrückung
+    \begin{minipage}[t]{0.32\textwidth}
+      \usekomavar{fromname} \\ 
+      \registerid\\
+      \register
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.32\textwidth}
+      \usekomavar{fromchairman} (\usekomavar{fromchairmantitle}) \\ 
+      \usekomavar{fromchairman2} (\usekomavar{fromchairman2title})\\
+      \usekomavar{fromchairman3} (\usekomavar{fromchairman3title})
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.32\textwidth}
+      \usekomavar{frombank}
+    \end{minipage}
+  }
+}
+% <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

@@ -1,0 +1,18 @@
+\ProvidesFile{business.lco}
+
+%%
+%% BUSINESS OPTIONS
+%%
+
+%% >>>>>>>>>>> ADDITIONAL CONTENT >>>>>>>>>>> 
+
+% >>>>>>>>>>> Geschäftszeichenzeile >>>>>>>>>>>
+% \setkomavar{yourref}{}          % Ihr Zeichen
+% \setkomavar{yourmail}{}         % Ihr Schreiben vom
+% \setkomavar{myref}{}            % Unser Zeichen
+% \setkomavar{customer}{}         % Mitgliedsnummer
+% \setkomavar{invoice}{}          % Rechnungsnummer
+
+\setkomavar{place}{\usekomavar{place}} % Ort aus config.tex
+\setkomavar{date}{\usekomavar{date}}   % Datum aus config.tex
+% <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

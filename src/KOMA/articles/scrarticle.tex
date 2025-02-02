@@ -1,0 +1,23 @@
+\documentclass{scrartcl} % Alternativ: scrreprt, scrbook
+\usepackage{scrlayer-scrpage} % Paket für Kopf- und Fußzeilen
+\clearpairofpagestyles % Entfernt alle Standard-Kopf- und Fußzeilen
+\ofoot{\today} % Außere Fußzeile: aktuelles Datum
+\cfoot{\thepage} % Zentrierte Fußzeile: Seitenzahl
+\ifoot{Mein Name} % Innere Fußzeile: Name des Autors
+
+\begin{document}
+
+\title{Ein Beispiel mit KOMA-Script}
+\author{Max Mustermann}
+\date{\today}
+\maketitle
+
+\newpage
+\section{Einleitung}
+Hier beginnt der Text des Dokuments.
+
+\newpage
+\section{Weiterer Abschnitt}
+Ein weiterer Abschnitt auf einer neuen Seite.
+
+\end{document}

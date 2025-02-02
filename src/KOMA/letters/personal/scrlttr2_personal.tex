@@ -1,0 +1,100 @@
+\documentclass[12pt,a4paper]{scrlttr2}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{tikz} % Paket für Schneeflocken
+\usepackage{pgfmath} % Zum Erzeugen von Zufallszahlen
+\usepackage{xcolor}
+\usepackage{multicols} % Für die Spalten am Ende des Briefes
+\usepackage{geometry} % Für benutzerdefinierte Layout-Einstellungen
+
+% Absenderadresse entfernen
+\setkomavar{fromname}{}
+\setkomavar{fromaddress}{}
+\setkomavar{date}{01.02.2025} % Datum
+\setkomavar{signature}{Erika Musterfrau} % Unterschrift
+
+% Kein Einrücken der ersten Zeile
+\setlength{\parindent}{0pt}
+
+% Layoutanpassung für das Logo und den Text
+\geometry{top=2.5cm, left=2.5cm, right=2.5cm, bottom=3.5cm}
+
+\begin{document}
+
+\begin{letter}{Max Mustermann\\ Musterstraße 1\\ 12345 Musterstadt}
+
+\begin{minipage}[t]{0.6\textwidth}
+\opening{Sehr geehrter Herr Mustermann,}
+
+% Hintergrund mit zufälligen Schneeflocken
+\begin{tikzpicture}[remember picture,overlay]
+    \foreach \x in {0,1,...,15} {
+        \foreach \y in {0,1,...,20} {
+            % Zufällige Positionen und Drehungen für Schneeflocken
+            \pgfmathsetmacro{\rx}{rand*360} % Zufällige Drehung
+            \pgfmathsetmacro{\px}{\x*3+rand*2} % Zufällige x-Position
+            \pgfmathsetmacro{\py}{\y*3+rand*2} % Zufällige y-Position
+            \node[opacity=0.1, scale=0.1, rotate=\rx] at (\px,\py) {
+                \tikzset{every picture/.style={line width=0.75pt}} % Dicke der Linien
+                % Schneekristall mit 6 Armen
+                \tikz \draw[rotate=\rx, scale=0.8, line width=0.6mm] (0,0) 
+                -- (0,1) 
+                -- (0.5,1.5) 
+                -- (1,1)
+                -- (0.5,0.5)
+                -- (0.5,-0.5) 
+                -- (0,0); % Schneekristallgeometrie
+            };
+        }
+    }
+\end{tikzpicture}
+
+hiermit möchte ich Sie über eine wichtige Angelegenheit informieren.
+
+\closing{Mit freundlichen Grüßen,}
+
+\ps{P.S. Hier könnte noch ein Nachsatz stehen.}
+
+\encl{Dokumente: Beispiel.pdf} % Angabe von Anlagen
+\end{minipage} 
+\begin{minipage}[t]{0.4\textwidth}
+  \vspace{-1.5cm} % Etwas mehr Abstand nach oben
+  \begin{flushright}
+    \includegraphics[width=4cm]{logo.png} % Das Logo wird hier eingefügt
+  \end{flushright}
+\end{minipage}
+
+\vspace{1cm} % Abstand zu den Spalten
+
+% Hier die Spalten am Fuß des Briefes
+\vfill % Fügt vertikalen Raum hinzu, damit der Fußzeilenblock am unteren Rand des Briefes erscheint
+\begin{multicols}{3}
+{\small \color{gray}
+\textbf{Bankverbindung:}\\
+XYZ Bank\\
+IBAN: DE12345678901234567890\\
+BIC: ABCDDEFFXXX
+}
+
+\columnbreak
+
+{\small \color{gray}
+\textbf{Geschäftsführer:}\\
+Erika Musterfrau\\
+Max Mustermann
+}
+
+\columnbreak
+
+{\small \color{gray}
+\textbf{Kontakt & Register:}\\
+Telefon: +49 123 456789\\
+E-Mail: kontakt@beispiel.de\\
+Vereinsregister: VR 12345
+}
+\end{multicols}
+
+\end{letter}
+
+\end{document}
