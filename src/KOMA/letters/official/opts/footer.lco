@@ -29,7 +29,7 @@
     \end{minipage}
     \hfill
     \begin{minipage}[t]{0.32\textwidth}
-      \usekomavar{frombank}
+      \raggedright \usekomavar{frombank}
     \end{minipage}
   }
 }
