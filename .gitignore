@@ -1,4 +1,10 @@
 ## Core latex/pdflatex auxiliary files:
+
+# CUSTOM DEFINITIONS
+# FOR THIS PROJECT
+
+config.tex
+
 *.aux
 *.lof
 *.log
