@@ -4,10 +4,10 @@ A collection of private LaTeX and KOMA-script templates.
 
 ## Usage
 
-To prevent storing sensitive information in the public repository and to improve the ease of 
-usage the provided templates here you can refer to the `config_example.tex` files.
+To prevent storing sensitive information in the public repository and to improve the ease of
+usage the provided templates here you can refer to the `*.config.example.tex` files.
 
-Those files can be renamed to `config.tex` files and then can be used to provide your custom data.
+Those files can be renamed to `*.config.tex` files and then can be used to provide your custom data.
 
 The same procedure can be applied for logos or any other images.
 
