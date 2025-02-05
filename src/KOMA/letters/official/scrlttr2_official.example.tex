@@ -1,0 +1,86 @@
+\documentclass[%
+  fontsize=12pt, % Schriftgröße
+  version=last%  % Neueste Version von KOMA-Skript verwenden
+]{scrlttr2}
+
+% >>>>>>>>>>> PAKETE & Deutsche Sprache >>>>>>>>>>>
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage{graphicx}
+\usepackage{marvosym}
+\usepackage{lipsum}
+\usepackage{graphicx}
+\usepackage{xcolor}
+
+\definecolor{grau}{rgb}{0.5,0.5,0.5} % Definiert ein mittleres Grau
+\setlength{\parindent}{0pt}
+% <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+% >>>>>>>>>>> LOAD LETTER OPTIONS >>>>>>>>>>>
+\KOMAoptions{%
+    % fromemail=true,       % Email wird im Briefkopf angezeigt
+    % fromphone=true,       % Telefonnumer wird im Briefkopf angezeigt
+    % fromfax=false,         % Faxnummer wird im Briefkopf angezeit
+    % fromurl=true,         % URL wird im Briefkopf angezeigt
+    % subject=titled,       % Druckt "Betrifft: " vor dem Betreff
+    fromlogo=true,        % Logo wird im Briefkopf angezeigt
+    locfield=narrow,          % Breite Absenderergänzung (location)
+    fromalign=left,         % Ausrichtung des Briefkopfes
+    fromrule=afteraddress%  % Trennlinie unter dem Briefkopf
+}
+
+
+\LoadLetterOption{DIN} % Einstellungen für DIN 676 laden
+\LoadLetterOption{opts/business} 
+\LoadLetterOption{opts/footer} 
+\LoadLetterOption{opts/sender} 
+\LoadLetterOption{opts/signature}
+% <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+\begin{document}
+
+\begin{letter}{%
+  
+  % >>>>>>>>>>> Zielanschrift >>>>>>>>>>>
+
+  Erika Musterfrau\\
+  Musterweg 43\\
+  56789 Musterhausen%
+
+  % <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+}
+
+
+\setkomavar{subject}{Das ist der Betreff}
+
+\opening{Sehr geehrte Frau Musterfrau,}
+
+\lipsum[1-3] % Drei Absätze mit Lorem Ipsum
+
+\closing{Mit freundlichen Grüßen}
+
+
+% >>>>>>>>>>> Postskriptum >>>>>>>>>>>
+\ps PS: \dots
+% <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+% >>>>>>>>>>> Anlage(n) >>>>>>>>>>>
+% \setkomavar*{enclseparator}{Anlage}
+\encl{%
+  Anlage 1\\
+  Anlage 2%
+}
+% <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+% >>>>>>>>>>> Verteiler >>>>>>>>>>>
+% \setkomavar*{ccseparator}{Kopie an}
+\cc{%
+  Verteiler 1\\
+  Verteiler 2%
+}
+% <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+\end{letter}
+\end{document}

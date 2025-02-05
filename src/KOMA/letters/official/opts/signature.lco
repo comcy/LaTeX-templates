@@ -1,6 +1,7 @@
 \ProvidesFile{signature.lco}
 
-\input{config_example.tex}
+%% !!! CHANGE THE NAME OF THE INPUT FILE !!! 
+\input{letter.config.example.tex}
 
 %%
 %% SIGNATURE OPTIONS
@@ -14,7 +15,7 @@
 
 % >>>>>>>>>>> Signatur >>>>>>>>>>>
 \setkomavar{signature}{%
-  \includegraphics[height=1.5cm]{../assets/signature_example.png}\\
+  \usekomavar{fromsignatureimg}\\
   \usekomavar{fromchairman}\\
   \scriptsize{(\textnormal{\usekomavar{fromsignature}})}%
 }
