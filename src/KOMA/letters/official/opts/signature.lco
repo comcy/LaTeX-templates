@@ -1,7 +1,10 @@
 \ProvidesFile{signature.lco}
 
 %% !!! CHANGE THE NAME OF THE INPUT FILE !!! 
+%% \input{letter.config.tex}
 \input{letter.config.example.tex}
+%% !!! ================================= !!!
+
 
 %%
 %% SIGNATURE OPTIONS
