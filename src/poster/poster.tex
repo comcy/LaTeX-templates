@@ -1,0 +1,57 @@
+%
+% This work has the LPPL maintenance status `maintained'.
+%
+% The Current Maintainer of this work is Níckolas de Aguiar Alves.
+%
+% This work consists of the files main.tex, README.md
+% and the derived file example.pdf.
+
+
+% This a LaTeX template for a minimalist academic poster. It was inspired by the #betterposter designs by Mike Morrison (https://www.youtube.com/@MikeMorrisonPhD)
+% This template was written by Níckolas de Aguiar Alves (alves-nickolas.github.io)
+
+\documentclass[portrait]{a0poster} % a0poster class to get a portrait a0-sized poster
+\usepackage{fontspec} %Please compile with LuaLaTeX to get advanced font functionalities. You can do this by going to the Menu (top-left of your screen, if you're on Overleaf) and selecting LuaLaTeX on Settings -> Compiler
+\setmainfont{Merriweather Sans} % main font (I will use in the title)
+\setsansfont{Carlito} % sans serif font (I will use elsewhere)
+\setmonofont{Fira Mono} % monospaced font (just in case)
+% the full set of fonts accepted by Overleaf is given in https://www.overleaf.com/learn/latex/Questions/Which_OTF_or_TTF_fonts_are_supported_via_fontspec%3F
+\usepackage{microtype} % improves output
+\usepackage{xcolor} % color capabilities
+\usepackage{tikz} % for positioning elements
+\usetikzlibrary{calc} % helps positioning elements
+\usepackage{graphicx} % required for inserting images
+\usepackage{qrcode} % automatically generated qr-codes from a link
+\usepackage{hyperref} % hyperlinks in the digital version
+
+\definecolor{background}{HTML}{101010} % color for the background
+\definecolor{textcolor}{HTML}{ffffff} % color for the text
+\definecolor{accent}{HTML}{f0be52} % highlight color
+
+\newcommand{\hl}[1]{\textcolor{accent}{#1}} % shortcut for highlighting
+
+\begin{document}
+\begin{tikzpicture}[remember picture, overlay, shift={(current page.center)}] % starts a tikz picture environment centered at the center of the page
+    \fill[background] (current page.south east) rectangle (current page.north west); % fills a rectangle covering the whole page with the background color
+
+    \node[textcolor,font={\VeryHuge\bfseries},scale=2,text width=0.41\pagewidth,align=left] (title) at (0,5cm) {\hl{Lorem ipsum} dolor\\\rightline{sit \hl{amet}}}; % comically large font for the title (\VeryHuge + scale=2). The text width is chosen so that it occupies 82% (remember the scale=2) of the total page width (I chose this number because I liked it). Left aligned because I thought it looks better, but I throw in a \rightline on the bottom line to get the final output. The title is centered at (0,5cm), so centered horizontally, but a bit closer to the top of the page than to the bottom. The \hl command is used to hightlight some keywords
+
+    \node[anchor=north east,textcolor,font={\large},align=right,scale=2] at ($(title.south east)+(0,-1cm)$) {adipiscing elit quam\\consectetur}; % subtitle. Scale=2 is necessary to ensure alignment with the title. The subtitle is written so that its right side is aligned to the title's right side. Line breaks add some charm and I think they look better if they form a decreasing sequence from the title downward (I modified lorem ipsum to force this effect, and you also may need to rephrase some things to get this to work)
+
+    \coordinate (bottomline) at ($(current page.south west)+(0,0.09\pagewidth)$); % coordinate to mark the bottom of the ``usable page''. I won't add any elements below this point
+
+    \coordinate (topline) at ($(current page.north west)+(0,-0.09\pagewidth)$); % similar to bottomline
+
+    \node[background,anchor=south east] (qrcodebase) at (title.east |- bottomline) {\qrcode[hyperlink,height=0.225\pagewidth]{https://www.google.com}}; % auxiliary qr code to establish the dimensions of the actual qr code. This is used to draw a white background precisely where the qr code is located, so that it is actually visible
+
+    \fill[textcolor] (qrcodebase.north west) rectangle (qrcodebase.south east); % white background for qr code
+
+    \node[background,anchor=south east] at (qrcodebase.south east) {\qrcode[hyperlink,height=0.225\pagewidth]{www.google.com}}; % automatically generated qr code, correctly aligned with the title. Replace www.google.com with the link you want to use: the longer the link, the more complex (and uglier) the qr code. The qr code is a square with size equal to 22.5% of the page width (this worked for me). Since its size is used to establish the alignment of the text next to it, you may want to play around a bit to get it to work.
+
+    \draw (title.west |- qrcodebase.north) node[anchor=north west,text width=0.55\pagewidth,textcolor,align=justify,font={\huge\sffamily}] (parone) {\hl{Lorem ipsum} dolor sit amet, consectetur adipiscing elit. Vivamus placerat quam id ligula porttitor, volutpat varius purus suscipit. Curabitur \hl{placerat vulputate} tortor et porta. Sed sit amet diam convallis, efficitur urna a, maximus eros. Aenean auctor accumsan \hl{scelerisque}. Donec urna nibh, vestibulum sed metus ut, ultrices efficitur nibh.}; % here goes your main text. Needs to be short to fit, but you can play around with the sizes if you want. The text is aligned with both the title (at the left) and the qr code (at the top).
+
+    \draw (title.west |- bottomline) node[anchor=south west,text width=0.55\pagewidth,textcolor,align=justify,font={\LARGE\sffamily}] (paragraph) {\textbf{\textcolor{accent}{John Doe}}, Richard Roe,  \emph{et al} (2024). “Very Important Title for a Paper,” \emph{Journal of Research} \textbf{00}, pp. 01--99. arXiv: \href{https://arxiv.org/abs/1234.56789}{1234.56789 [ab-cd]}.}; % reference for your work
+
+    \draw (title.west |- topline) node[anchor=north west] (logos) {\includegraphics[height=0.025\pagewidth]{example-image-a}\quad\includegraphics[height=0.025\pagewidth]{example-image-b}\quad\includegraphics[height=0.025\pagewidth]{example-image-c}}; % university logos, funding agencies, etc
+\end{tikzpicture}
+\end{document}

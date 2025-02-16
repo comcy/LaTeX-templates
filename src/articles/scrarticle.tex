@@ -1,5 +1,6 @@
 \documentclass{scrartcl} % Alternativ: scrreprt, scrbook
 \usepackage{scrlayer-scrpage} % Paket für Kopf- und Fußzeilen
+\usepackage{framed} % Paket für Kopf- und Fußzeilen
 \clearpairofpagestyles % Entfernt alle Standard-Kopf- und Fußzeilen
 \ofoot{\today} % Außere Fußzeile: aktuelles Datum
 \cfoot{\thepage} % Zentrierte Fußzeile: Seitenzahl
@@ -15,6 +16,18 @@
 \newpage
 \section{Einleitung}
 Hier beginnt der Text des Dokuments.
+
+MyST makes Markdown more \textit{extensible} \& \textbf{powerful} to support an ecosystem of tools for computational narratives, technical documentation, and open scientific communication.
+
+\begin{framed}
+\textbf{Our Values}\\
+We believe in a community-driven approach of open-source tools that are composable and extensible.
+\end{framed}
+
+\begin{framed}
+\textbf{Note}\\
+The not
+\end{framed}
 
 \newpage
 \section{Weiterer Abschnitt}
