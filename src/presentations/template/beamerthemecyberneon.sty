@@ -1,0 +1,94 @@
+\mode<presentation>
+
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{shadows}
+
+% Colors
+\definecolor{bg}{HTML}{16181D}
+\definecolor{textgreen}{HTML}{9AFF9A}
+\definecolor{neongreen}{HTML}{6CFF5F}
+\definecolor{textpink}{HTML}{EFA7FF}
+\definecolor{pastelpink}{HTML}{F3C8FF}
+\definecolor{neonpink}{HTML}{FF5CFF}
+\definecolor{boxbg}{HTML}{0A0C0F}
+
+\setbeamercolor{background canvas}{bg=bg}
+\setbeamercolor{normal text}{fg=textpink,bg=bg}
+\setbeamercolor{structure}{fg=neongreen}
+\setbeamercolor{frametitle}{fg=neonpink,bg=bg}
+\setbeamercolor{title}{fg=neonpink}
+\setbeamercolor{subtitle}{fg=neongreen}
+\setbeamercolor{item}{fg=textgreen}
+\setbeamertemplate{itemize item}{\color{neongreen}$\triangleright$}
+\setbeamertemplate{itemize subitem}{\color{textgreen}$\blacktriangleright$}
+
+\setbeamerfont{frametitle}{series=\bfseries}
+\setbeamerfont{title}{series=\bfseries}
+\setbeamerfont{subtitle}{series=\mdseries}
+\setbeamerfont{author}{series=\mdseries}
+\setbeamerfont{date}{series=\mdseries}
+
+\setbeamertemplate{title page}{
+  \vfill
+  \begin{center}
+  \setlength{\fboxsep}{0pt}
+  \setlength{\fboxrule}{4pt}
+  \fcolorbox{neonpink}{boxbg}{%
+    \fcolorbox{neongreen}{boxbg}{%
+    \begin{minipage}{0.75\paperwidth}
+      \vspace{1.2em}
+      \raggedright
+      {\hspace{1.2em}\usebeamerfont{title}\color{neonpink}\inserttitle\par}
+      \vspace{0.8em}
+      \raggedright
+      {\hspace{.8em}\color{neongreen}\rule{.75\linewidth}{1.5pt}}\par
+      \vspace{0.8em}
+      \raggedright
+      {\hspace{1.8em}\usebeamerfont{subtitle}\color{neongreen}\insertsubtitle\par}
+      \vspace{1.2em}
+    \end{minipage}%
+    }%
+}
+  \end{center}
+  \vspace{1em}
+  \begin{center}
+  {\usebeamerfont{author}\color{neonpink}\insertauthor\par}
+  \vspace{0.5em}
+  {\usebeamerfont{date}\color{neongreen}\insertdate\par}
+  \end{center}
+  \vfill
+}
+
+\setbeamertemplate{frametitle}{
+  \vspace{0.3em}
+  \begin{beamercolorbox}[wd=\paperwidth,sep=1.2em,left]{frametitle}
+    {\usebeamerfont{frametitle}\insertframetitle}
+  \end{beamercolorbox}
+  \vspace{-0.3em}
+  {\color{neonpink}\rule{\paperwidth}{0.6pt}}
+}
+
+\setbeamertemplate{navigation symbols}{}
+
+\setbeamertemplate{section in toc}[sections numbered]
+
+\makeatletter
+\setbeamertemplate{footline}{%
+  \ifbeamer@plainframe
+  \else
+    \begin{beamercolorbox}[wd=\paperwidth,ht=2.5ex,dp=1ex]{footline}
+      \hspace{1em}
+      {\color{neongreen}\tiny\insertshortauthor\hspace{0.5em}|\hspace{0.5em}\insertshorttitle}
+      \hfill
+      {\color{neongreen}\insertslidenavigationsymbol\insertframenavigationsymbol\insertsubsectionnavigationsymbol\insertsectionnavigationsymbol\insertdocnavigationsymbol\insertbackfindforwardnavigationsymbol}
+      \hfill
+      {\color{neongreen}\tiny\insertframenumber/\inserttotalframenumber}
+      \hspace{1em}
+    \end{beamercolorbox}
+    \vspace{0.2em}
+  \fi
+}
+\makeatother
+
+\mode<all>
