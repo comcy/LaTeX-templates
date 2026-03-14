@@ -3,10 +3,10 @@
 set -e
 
 # --- Configuration ---
-# REPLACE THIS with your actual repository URL for curl installation to work!
-REPO_URL="https://github.com/USERNAME/latex-cli.git"
+REPO_URL="https://github.com/comcy/LaTeX-templates.git"
+SUB_DIR="src/latex-cli"
 CONFIG_DIR="$HOME/.latex-cli"
-REPO_DEST="$CONFIG_DIR/src"
+REPO_DEST="$CONFIG_DIR/src-repo"
 BIN_DEST="$HOME/.local/bin/latex-cli"
 
 # Colors
@@ -32,7 +32,8 @@ else
     else
         git clone "$REPO_URL" "$REPO_DEST" --quiet
     fi
-    REPO_DIR="$REPO_DEST"
+    # In a monorepo, the actual tool is in a subfolder
+    REPO_DIR="$REPO_DEST/$SUB_DIR"
 fi
 
 # 2. Ensure directories exist
@@ -40,7 +41,6 @@ mkdir -p "$CONFIG_DIR"
 mkdir -p "$HOME/.local/bin"
 
 # 3. Link templates
-# We link to the templates in the repo so updates to the repo affect the CLI
 echo "Linking templates..."
 ln -sf "$REPO_DIR/templates" "$CONFIG_DIR/templates"
 

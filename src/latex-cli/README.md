@@ -16,10 +16,8 @@ Du kannst das Tool mit einem einzigen Befehl installieren. Der Installer lädt d
 ### One-Line Install (Empfohlen)
 
 ```bash
-curl -sL https://raw.githubusercontent.com/comcy/LaTeX-templates/refs/heads/master/src/latex-cli/install.sh | bash
+curl -sL https://raw.githubusercontent.com/comcy/LaTeX-templates/master/src/latex-cli/install.sh | bash
 ```
-
-*Hinweis: Ersetze `USERNAME` mit deinem tatsächlichen GitHub-Nutzernamen.*
 
 ### Manuelle Installation (Lokales Repository)
 
