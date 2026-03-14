@@ -62,6 +62,8 @@ person:
 
 defaults:
   editor: nano
+  engine: pdflatex
+  viewer: xdg-open
   build: true
 ```
 
@@ -161,12 +163,11 @@ Mail:
 Editor:
 ```
 
-- `latex-cli new letter`
+- `latex-cli new letter [name]`
 
 Workflow:
-
-- Ordnername fragen
-- Empfänger mehrzeilig
+- Ordnername (optional über Argument oder fragen)
+- Empfänger Details
 - Betreff
 - Template kopieren
 - Platzhalter ersetzen

@@ -19,7 +19,7 @@ function usage() {
     echo ""
     echo "Commands:"
     echo "  init           Initialize local configuration"
-    echo "  new [type]     Create a new document (e.g., letter)"
+    echo "  new [type] [name] Create a new document (e.g., letter [my_folder])"
     echo "  templates      List available templates"
     echo "  config         Show current configuration"
     exit 1
@@ -42,6 +42,7 @@ function cmd_init() {
     read -p "Email: " email
     read -p "Editor (e.g., nano, vim): " editor
     read -p "LaTeX Engine (e.g., pdflatex, xelatex): " engine
+    read -p "PDF Viewer (e.g., xdg-open, open): " viewer
 
     cat <<EOF > "$CONFIG_FILE"
 person:
@@ -54,6 +55,7 @@ person:
 defaults:
   editor: "${editor:-nano}"
   engine: "${engine:-pdflatex}"
+  viewer: "${viewer:-xdg-open}"
   build: true
 EOF
     echo -e "${GREEN}Config saved to $CONFIG_FILE${NC}"
@@ -66,6 +68,7 @@ function cmd_templates() {
 
 function cmd_new() {
     local type=$1
+    local name_arg=$2
     if [[ -z "$type" ]]; then
         echo "Error: Please specify a template type (e.g., letter)"
         exit 1
@@ -84,26 +87,41 @@ function cmd_new() {
     local phone=$(get_config_value "phone")
     local email=$(get_config_value "email")
     local engine=$(get_config_value "engine")
+    local viewer=$(get_config_value "viewer")
 
     if [[ -z "$name" ]]; then
         echo -e "${RED}Error: Config missing. Run 'latex-cli init' first.${NC}"
         exit 1
     fi
 
-    # Prompt for recipient
-    echo "Enter recipient (empty line to finish):"
-    local recipient=""
-    while IFS= read -r line && [[ -n "$line" ]]; do
-        recipient+="${line}\\\\\\ \n"
-    done
-    recipient=$(echo -e "$recipient" | sed 's/\\\\\ $//')
-
+    # Recipient prompts
+    echo -e "${BLUE}Recipient Details:${NC}"
+    read -p "Prefix (Optional, e.g. Company): " rec_prefix
+    read -p "Name: " rec_name
+    read -p "Street: " rec_street
+    read -p "City: " rec_city
     read -p "Subject: " subject
 
+    # Handle optional prefix (adding LaTeX newline)
+    if [[ -n "$rec_prefix" ]]; then
+        rec_prefix="${rec_prefix}\\\\"
+    fi
+
     # Create target directory
-    local date_str=$(date +%Y-%m-%d_%H-%M)
-    local target_dir="document_${type}_${date_str}"
+    local target_dir=""
+    if [[ -n "$name_arg" ]]; then
+        target_dir="$name_arg"
+    else
+        local date_str=$(date +%Y-%m-%d_%H-%M)
+        target_dir="document_${type}_${date_str}"
+    fi
+    
+    if [[ -d "$target_dir" ]]; then
+        echo -e "${RED}Error: Directory '$target_dir' already exists.${NC}"
+        exit 1
+    fi
     mkdir -p "$target_dir"
+    
     local target_file="$target_dir/${type}.tex"
     local target_makefile="$target_dir/Makefile"
 
@@ -113,20 +131,36 @@ function cmd_new() {
         cp "$TEMPLATES_DIR/$type/Makefile" "$target_makefile"
     fi
 
-    # Replace placeholders in .tex
-    sed -i "s/<<NAME>>/$name/g" "$target_file"
-    sed -i "s/<<STREET>>/$street/g" "$target_file"
-    sed -i "s/<<CITY>>/$city/g" "$target_file"
-    sed -i "s/<<PHONE>>/$phone/g" "$target_file"
-    sed -i "s/<<EMAIL>>/$email/g" "$target_file"
-    sed -i "s/<<BETREFF>>/$subject/g" "$target_file"
-    
-    # Recipient and Text placeholder
+    # Replace placeholders in .tex using Python for safety
+    export REC_PREFIX="$rec_prefix"
+    export REC_NAME="$rec_name"
+    export REC_STREET="$rec_street"
+    export REC_CITY="$rec_city"
+    export MY_NAME="$name"
+    export MY_STREET="$street"
+    export MY_CITY="$city"
+    export MY_PHONE="$phone"
+    export MY_EMAIL="$email"
+    export MY_SUBJECT="$subject"
+
     python3 -c "
-import sys
+import os
 content = open('$target_file').read()
-content = content.replace('<<EMPFAENGER>>', \"\"\"$recipient\"\"\")
-content = content.replace('<<TEXT>>', '[WRITE CONTENT HERE]')
+replacements = {
+    '<<NAME>>': os.environ.get('MY_NAME', ''),
+    '<<STREET>>': os.environ.get('MY_STREET', ''),
+    '<<CITY>>': os.environ.get('MY_CITY', ''),
+    '<<PHONE>>': os.environ.get('MY_PHONE', ''),
+    '<<EMAIL>>': os.environ.get('MY_EMAIL', ''),
+    '<<BETREFF>>': os.environ.get('MY_SUBJECT', ''),
+    '<<RECEIVER_PREFIX>>': os.environ.get('REC_PREFIX', ''),
+    '<<RECEIVER_NAME>>': os.environ.get('REC_NAME', ''),
+    '<<RECEIVER_STREET>>': os.environ.get('REC_STREET', ''),
+    '<<RECEIVER_CITY>>': os.environ.get('REC_CITY', ''),
+    '<<TEXT>>': '[WRITE CONTENT HERE]'
+}
+for key, value in replacements.items():
+    content = content.replace(key, value)
 with open('$target_file', 'w') as f:
     f.write(content)
 "
@@ -142,13 +176,27 @@ with open('$target_file', 'w') as f:
     # Open editor
     local editor=$(get_config_value "editor")
     ${editor:-nano} "$target_file"
+
+    # Post-Editor: Ask to build and open
+    echo ""
+    read -p "Build PDF and open with $viewer? (y/n): " do_build
+    if [[ "$do_build" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+        echo -e "${BLUE}Building PDF...${NC}"
+        (cd "$target_dir" && make)
+        if [[ -f "$target_dir/${type}.pdf" ]]; then
+            echo -e "${GREEN}Opening PDF...${NC}"
+            ${viewer:-xdg-open} "$target_dir/${type}.pdf" &
+        else
+            echo -e "${RED}Error: PDF build failed.${NC}"
+        fi
+    fi
 }
 
 # Main routing
 case "$1" in
     init) cmd_init ;;
     templates) cmd_templates ;;
-    new) cmd_new "$2" ;;
+    new) cmd_new "$2" "$3" ;;
     config) cat "$CONFIG_FILE" ;;
     *) usage ;;
 esac
