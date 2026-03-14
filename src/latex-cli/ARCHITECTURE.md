@@ -59,6 +59,7 @@ person:
   city: 12345 Musterstadt
   phone: "+49 123 456789"
   email: max@example.com
+  business_email: max.work@example.com
 
 defaults:
   editor: nano

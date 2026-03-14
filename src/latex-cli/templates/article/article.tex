@@ -1,0 +1,138 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Journal Article
+% LaTeX Template
+% Version 2.0 (February 7, 2023)
+%
+% This template originates from:
+% https://www.LaTeXTemplates.com
+%
+% Author:
+% Vel (vel@latextemplates.com)
+%
+% License:
+% CC BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/)
+%
+% NOTE: The bibliography needs to be compiled using the biber engine.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[
+	a4paper, % Paper size, use either a4paper or letterpaper
+	10pt, % Default font size, can also use 11pt or 12pt, although this is not recommended
+	unnumberedsections, % Comment to enable section numbering
+	twoside, % Two side traditional mode where headers and footers change between odd and even pages, comment this option to make them fixed
+]{customarticle}
+
+\addbibresource{bib/sample.bib} % BibLaTeX bibliography file
+
+\runninghead{<<BETREFF>>} % A shortened article title to appear in the running head
+
+\footertext{Generated via latex-cli} % Text to appear in the footer
+
+\setcounter{page}{1} % The page number of the first page
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\title{<<BETREFF>>} % Article title
+
+\author{%
+	<<AUTHORS>>
+}
+
+\date{
+	\footnotesize <<AFFILIATIONS>>
+}
+
+% Full-width abstract
+\renewcommand{\maketitlehookd}{%
+	\begin{abstract}
+		\noindent Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent porttitor arcu luctus, imperdiet urna iaculis, mattis eros. Pellentesque iaculis odio vel nisl ullamcorper, nec faucibus ipsum molestie. Sed dictum nisl non aliquet porttitor. Etiam vulputate arcu dignissim, finibus sem et, viverra nisl. Aenean luctus congue massa, ut laoreet metus ornare in. Nunc fermentum nisi imperdiet lectus tincidunt vestibulum at ac elit. Nulla mattis nisl eu malesuada suscipit.
+	\end{abstract}
+}
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+\maketitle % Output the title section
+
+\listoffigures % Added List of Figures for testing
+\newpage
+
+%----------------------------------------------------------------------------------------
+%	ARTICLE CONTENTS
+%----------------------------------------------------------------------------------------
+
+\section{Introduction}
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent porttitor arcu luctus, imperdiet urna iaculis, mattis eros. Pellentesque iaculis odio vel nisl ullamcorper, nec faucibus ipsum molestie. Sed dictum nisl non aliquet porttitor. Etiam vulputate arcu dignissim, finibus sem et, viverra nisl. Aenean luctus congue massa, ut laoreet metus ornare in. Nunc fermentum nisi imperdiet lectus tincidunt vestibulum at ac elit. Nulla mattis nisl eu malesuada suscipit.
+
+\begin{equation}
+	\cos^3 \theta =\frac{1}{4}\cos\theta+\frac{3}{4}\cos 3\theta
+	\label{eq:example}
+\end{equation}
+
+Automatically referencing an equation number using its label: Equation \ref{eq:example}.
+
+\section{Methodologies}
+
+\subsection{Sample Sites \& Processing}
+
+This line shows how to use a footnote to further explain or cite text\footnote{Example footnote text.}.
+
+\begin{itemize}
+	\item Arcu eros accumsan lorem, at posuere mi diam sit amet tortor
+	\item Fusce fermentum, mi sit amet euismod rutrum
+	\item Sem lorem molestie diam, iaculis aliquet sapien tortor non nisi
+\end{itemize}
+
+\subsection{Visual Representation}
+
+In this section, we present a sample figure to demonstrate the graphics inclusion and the List of Figures functionality.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.8\linewidth]{example-image} % Standard LaTeX placeholder image
+	\caption{A sample figure showing a placeholder image.}
+	\label{fig:sample}
+\end{figure}
+
+Referencing the figure in text: As shown in Figure \ref{fig:sample}, the data points are clearly visible.
+
+\section{Results}
+
+\begin{table}[h]
+	\caption{Example single column table.}
+	\centering
+	\begin{tabular}{l l r}
+		\toprule
+		Location & Distance & Count \\
+		\midrule
+		East & 100km & 422 \\
+		West & 350km & 1833 \\
+		\bottomrule
+	\end{tabular}
+	\label{tab:example}
+\end{table}
+
+Referencing a table using its label: Table \ref{tab:example}.
+
+\section{Discussion}
+
+This statement requires citation \autocite{Smith:2023qr}. This statement requires multiple citations \autocite{Smith:2023qr, Smith:2024jd}.
+
+%----------------------------------------------------------------------------------------
+%	 REFERENCES
+%----------------------------------------------------------------------------------------
+
+\printbibliography % Output the bibliography
+
+%----------------------------------------------------------------------------------------
+
+\end{document}

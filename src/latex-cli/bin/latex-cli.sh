@@ -39,7 +39,8 @@ function cmd_init() {
     read -p "Street: " street
     read -p "City (ZIP + City): " city
     read -p "Phone: " phone
-    read -p "Email: " email
+    read -p "Private Email: " email
+    read -p "Business Email: " b_email
     read -p "Editor (e.g., nano, vim): " editor
     read -p "LaTeX Engine (e.g., pdflatex, xelatex): " engine
     read -p "PDF Viewer (e.g., xdg-open, open): " viewer
@@ -51,6 +52,7 @@ person:
   city: "$city"
   phone: "$phone"
   email: "$email"
+  business_email: "$b_email"
 
 defaults:
   editor: "${editor:-nano}"
@@ -74,8 +76,9 @@ function cmd_new() {
         exit 1
     fi
 
-    local template_path="$TEMPLATES_DIR/$type/$type.tex"
-    if [[ ! -f "$template_path" ]]; then
+    local template_dir="$TEMPLATES_DIR/$type"
+    local template_file="$template_dir/$type.tex"
+    if [[ ! -f "$template_file" ]]; then
         echo -e "${RED}Error: Template '$type' not found in $TEMPLATES_DIR${NC}"
         exit 1
     fi
@@ -86,6 +89,7 @@ function cmd_new() {
     local city=$(get_config_value "city")
     local phone=$(get_config_value "phone")
     local email=$(get_config_value "email")
+    local b_email=$(get_config_value "business_email")
     local engine=$(get_config_value "engine")
     local viewer=$(get_config_value "viewer")
 
@@ -94,13 +98,23 @@ function cmd_new() {
         exit 1
     fi
 
-    # Recipient prompts
-    echo -e "${BLUE}Recipient Details:${NC}"
-    read -p "Prefix (Optional, e.g. Company): " rec_prefix
-    read -p "Name: " rec_name
-    read -p "Street: " rec_street
-    read -p "City: " rec_city
-    read -p "Subject: " subject
+    # Conditional Prompts
+    local rec_prefix=""
+    local rec_name=""
+    local rec_street=""
+    local rec_city=""
+    local subject=""
+
+    if [[ "$type" == "letter" ]]; then
+        echo -e "${BLUE}Recipient Details:${NC}"
+        read -p "Prefix (Optional, e.g. Company): " rec_prefix
+        read -p "Name: " rec_name
+        read -p "Street: " rec_street
+        read -p "City: " rec_city
+        read -p "Subject: " subject
+    else
+        read -p "Title / Subject: " subject
+    fi
 
     # Handle optional prefix (adding LaTeX newline)
     if [[ -n "$rec_prefix" ]]; then
@@ -125,11 +139,8 @@ function cmd_new() {
     local target_file="$target_dir/${type}.tex"
     local target_makefile="$target_dir/Makefile"
 
-    # Copy files
-    cp "$template_path" "$target_file"
-    if [[ -f "$TEMPLATES_DIR/$type/Makefile" ]]; then
-        cp "$TEMPLATES_DIR/$type/Makefile" "$target_makefile"
-    fi
+    # Copy ALL files from template directory to target directory
+    cp -r "$template_dir/." "$target_dir/"
 
     # Replace placeholders in .tex using Python for safety
     export REC_PREFIX="$rec_prefix"
@@ -141,6 +152,7 @@ function cmd_new() {
     export MY_CITY="$city"
     export MY_PHONE="$phone"
     export MY_EMAIL="$email"
+    export MY_BUSINESS_EMAIL="$b_email"
     export MY_SUBJECT="$subject"
 
     python3 -c "
@@ -152,6 +164,7 @@ replacements = {
     '<<CITY>>': os.environ.get('MY_CITY', ''),
     '<<PHONE>>': os.environ.get('MY_PHONE', ''),
     '<<EMAIL>>': os.environ.get('MY_EMAIL', ''),
+    '<<BUSINESS_EMAIL>>': os.environ.get('MY_BUSINESS_EMAIL', ''),
     '<<BETREFF>>': os.environ.get('MY_SUBJECT', ''),
     '<<RECEIVER_PREFIX>>': os.environ.get('REC_PREFIX', ''),
     '<<RECEIVER_NAME>>': os.environ.get('REC_NAME', ''),
