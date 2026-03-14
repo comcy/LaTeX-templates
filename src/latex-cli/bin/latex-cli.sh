@@ -74,8 +74,9 @@ function cmd_new() {
         exit 1
     fi
 
-    local template_path="$TEMPLATES_DIR/$type/$type.tex"
-    if [[ ! -f "$template_path" ]]; then
+    local template_dir="$TEMPLATES_DIR/$type"
+    local template_file="$template_dir/$type.tex"
+    if [[ ! -f "$template_file" ]]; then
         echo -e "${RED}Error: Template '$type' not found in $TEMPLATES_DIR${NC}"
         exit 1
     fi
@@ -94,13 +95,23 @@ function cmd_new() {
         exit 1
     fi
 
-    # Recipient prompts
-    echo -e "${BLUE}Recipient Details:${NC}"
-    read -p "Prefix (Optional, e.g. Company): " rec_prefix
-    read -p "Name: " rec_name
-    read -p "Street: " rec_street
-    read -p "City: " rec_city
-    read -p "Subject: " subject
+    # Conditional Prompts
+    local rec_prefix=""
+    local rec_name=""
+    local rec_street=""
+    local rec_city=""
+    local subject=""
+
+    if [[ "$type" == "letter" ]]; then
+        echo -e "${BLUE}Recipient Details:${NC}"
+        read -p "Prefix (Optional, e.g. Company): " rec_prefix
+        read -p "Name: " rec_name
+        read -p "Street: " rec_street
+        read -p "City: " rec_city
+        read -p "Subject: " subject
+    else
+        read -p "Title / Subject: " subject
+    fi
 
     # Handle optional prefix (adding LaTeX newline)
     if [[ -n "$rec_prefix" ]]; then
@@ -125,11 +136,8 @@ function cmd_new() {
     local target_file="$target_dir/${type}.tex"
     local target_makefile="$target_dir/Makefile"
 
-    # Copy files
-    cp "$template_path" "$target_file"
-    if [[ -f "$TEMPLATES_DIR/$type/Makefile" ]]; then
-        cp "$TEMPLATES_DIR/$type/Makefile" "$target_makefile"
-    fi
+    # Copy ALL files from template directory to target directory
+    cp -r "$template_dir/." "$target_dir/"
 
     # Replace placeholders in .tex using Python for safety
     export REC_PREFIX="$rec_prefix"

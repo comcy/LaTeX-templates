@@ -1,0 +1,106 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Journal Article
+% LaTeX Template
+%
+% NOTE: The bibliography needs to be compiled using the biber engine.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[
+	a4paper, % Paper size, use either a4paper or letterpaper
+	10pt, % Default font size, can also use 11pt or 12pt, although this is not recommended
+	unnumberedsections, % Comment to enable section numbering
+	twoside, % Two side traditional mode where headers and footers change between odd and even pages, comment this option to make them fixed
+]{article}
+
+\addbibresource{sample.bib} % BibLaTeX bibliography file
+
+\runninghead{<<BETREFF>>} % A shortened article title to appear in the running head
+
+\footertext{Generated via latex-cli} % Text to appear in the footer
+
+\setcounter{page}{1} % The page number of the first page
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\title{<<BETREFF>>} % Article title
+
+\author{%
+	<<NAME>>\thanks{Corresponding author: \href{mailto:<<EMAIL>>}{<<EMAIL>>}}
+}
+
+\date{\footnotesize <<STREET>>, <<CITY>>}
+
+% Full-width abstract
+\renewcommand{\maketitlehookd}{%
+	\begin{abstract}
+		\noindent This is a placeholder for the abstract text. It provides a brief summary of the research, methodology, results, and conclusions of the article.
+	\end{abstract}
+}
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+\maketitle % Output the title section
+
+%----------------------------------------------------------------------------------------
+%	ARTICLE CONTENTS
+%----------------------------------------------------------------------------------------
+
+\section{Introduction}
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent porttitor arcu luctus, imperdiet urna iaculis, mattis eros. Pellentesque iaculis odio vel nisl ullamcorper, nec faucibus ipsum molestie. Sed dictum nisl non aliquet porttitor.
+
+\begin{equation}
+	\cos^3 \theta =\frac{1}{4}\cos\theta+\frac{3}{4}\cos 3\theta
+	\label{eq:example}
+\end{equation}
+
+Example reference: Equation \ref{eq:example}.
+
+\section{Methodologies}
+
+\subsection{Data Collection}
+
+This line shows how to use a footnote\footnote{Example footnote text.}.
+
+\begin{itemize}
+	\item Point 1
+	\item Point 2
+\end{itemize}
+
+\section{Results}
+
+\begin{table}[h]
+	\caption{Example Table.}
+	\centering
+	\begin{tabular}{l r}
+		\toprule
+		Item & Value \\
+		\midrule
+		Data A & 123 \\
+		Data B & 456 \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+\section{Discussion}
+
+Referencing a book \autocite{Smith:2023qr} and an article \autocite{Smith:2024jd}.
+
+%----------------------------------------------------------------------------------------
+%	 REFERENCES
+%----------------------------------------------------------------------------------------
+
+\printbibliography % Output the bibliography
+
+%----------------------------------------------------------------------------------------
+
+\end{document}

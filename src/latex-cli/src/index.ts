@@ -101,21 +101,32 @@ program
   .description('Create a new document from a template')
   .action(async (type, name) => {
     const config = await ensureConfig();
-    const templatePath = path.join(TEMPLATES_DIR, type, `${type}.tex`);
-    const makefileTemplatePath = path.join(TEMPLATES_DIR, type, 'Makefile');
+    const templateDir = path.join(TEMPLATES_DIR, type);
+    const templatePath = path.join(templateDir, `${type}.tex`);
+    const makefileTemplatePath = path.join(templateDir, 'Makefile');
 
     if (!fs.default.existsSync(templatePath)) {
       console.error(chalk.red(`Template "${type}" not found.`));
       process.exit(1);
     }
 
-    const { rec_prefix, rec_name, rec_street, rec_city, subject } = await (inquirer.prompt as any)([
-      { type: 'input', name: 'rec_prefix', message: 'Recipient Prefix (Optional, e.g. Company):' },
-      { type: 'input', name: 'rec_name', message: 'Recipient Name:' },
-      { type: 'input', name: 'rec_street', message: 'Recipient Street:' },
-      { type: 'input', name: 'rec_city', message: 'Recipient City:' },
-      { type: 'input', name: 'subject', message: 'Subject:' },
-    ]);
+    let prompts: any[] = [];
+    if (type === 'letter') {
+      prompts = [
+        { type: 'input', name: 'rec_prefix', message: 'Recipient Prefix (Optional, e.g. Company):' },
+        { type: 'input', name: 'rec_name', message: 'Recipient Name:' },
+        { type: 'input', name: 'rec_street', message: 'Recipient Street:' },
+        { type: 'input', name: 'rec_city', message: 'Recipient City:' },
+        { type: 'input', name: 'subject', message: 'Subject:' },
+      ];
+    } else {
+      prompts = [
+        { type: 'input', name: 'subject', message: 'Title / Subject:' },
+      ];
+    }
+
+    const answers = await (inquirer.prompt as any)(prompts);
+    const { rec_prefix, rec_name, rec_street, rec_city, subject } = answers;
 
     let targetDir: string;
     if (name) {
@@ -133,8 +144,11 @@ program
     const targetFile = path.join(targetDir, `${type}.tex`);
     const targetMakefile = path.join(targetDir, 'Makefile');
 
+    // Copy entire template directory to target
     fs.default.ensureDirSync(targetDir);
-    let content = fs.default.readFileSync(templatePath, 'utf8');
+    fs.default.copySync(templateDir, targetDir);
+
+    let content = fs.default.readFileSync(targetFile, 'utf8');
 
     // Handle optional prefix
     const prefixValue = rec_prefix ? `${rec_prefix}\\\\` : '';
@@ -147,10 +161,10 @@ program
       '<<PHONE>>': config.person.phone,
       '<<EMAIL>>': config.person.email,
       '<<BETREFF>>': subject,
-      '<<RECEIVER_PREFIX>>': prefixValue,
-      '<<RECEIVER_NAME>>': rec_name,
-      '<<RECEIVER_STREET>>': rec_street,
-      '<<RECEIVER_CITY>>': rec_city,
+      '<<RECEIVER_PREFIX>>': prefixValue || '',
+      '<<RECEIVER_NAME>>': rec_name || '',
+      '<<RECEIVER_STREET>>': rec_street || '',
+      '<<RECEIVER_CITY>>': rec_city || '',
       '<<TEXT>>': '[WRITE CONTENT HERE]',
     };
 
@@ -161,8 +175,8 @@ program
     fs.default.writeFileSync(targetFile, content);
 
     // Makefile handling
-    if (fs.default.existsSync(makefileTemplatePath)) {
-      let makefileContent = fs.default.readFileSync(makefileTemplatePath, 'utf8');
+    if (fs.default.existsSync(targetMakefile)) {
+      let makefileContent = fs.default.readFileSync(targetMakefile, 'utf8');
       makefileContent = makefileContent.split('<<ENGINE>>').join(config.defaults.engine || 'pdflatex');
       makefileContent = makefileContent.split('<<TYPE>>').join(type);
       fs.default.writeFileSync(targetMakefile, makefileContent);
