@@ -69,12 +69,12 @@
 \fancyhf{} % Clear all defaults
 
 % Header
-\fancyhead[RO]{\small\textit{\runninghead}}
-\fancyhead[LE]{\small\textit{\runninghead}}
+\fancyhead[RO]{\small\textit{\internalrunninghead}}
+\fancyhead[LE]{\small\textit{\internalrunninghead}}
 
 % Footer: Alternating positions for twoside documents
 \fancyfoot[RO,LE]{\small Seite \thepage\ / \pageref{LastPage}}
-\fancyfoot[LO,RE]{\footnotesize\footertext}
+\fancyfoot[LO,RE]{\footnotesize\internalfootertext}
 
 % Ensure the first page (usually odd) also has the footer on the right
 \fancypagestyle{plain}{
@@ -82,7 +82,7 @@
 	\renewcommand{\headrulewidth}{0pt}
 	\renewcommand{\footrulewidth}{0.4pt}
 	\fancyfoot[R]{\small Seite \thepage\ / \pageref{LastPage}}
-	\fancyfoot[L]{\footnotesize\footertext}
+	\fancyfoot[L]{\footnotesize\internalfootertext}
 }
 
 %----------------------------------------------------------------------------------------
@@ -205,8 +205,8 @@
 %	CUSTOM COMMANDS
 %----------------------------------------------------------------------------------------
 
-\newcommand{\runninghead}[1]{\def\runninghead{#1}}
-\def\runninghead{} % Initialize empty
+\newcommand{\runninghead}[1]{\def\internalrunninghead{#1}}
+\def\internalrunninghead{} % Initialize empty
 
-\newcommand{\footertext}[1]{\def\footertext{#1}}
-\def\footertext{} % Initialize empty
+\newcommand{\footertext}[1]{\def\internalfootertext{#1}}
+\def\internalfootertext{} % Initialize empty
