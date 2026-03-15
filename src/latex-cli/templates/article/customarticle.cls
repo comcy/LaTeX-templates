@@ -77,7 +77,7 @@
 \fancyfoot[L]{\footnotesize\footertext}
 
 % Ensure the first page also has the footer
-\fpagestyle{plain}{
+\fancypagestyle{plain}{
 	\fancyhf{}
 	\renewcommand{\headrulewidth}{0pt}
 	\renewcommand{\footrulewidth}{0.4pt}
@@ -206,4 +206,5 @@
 %----------------------------------------------------------------------------------------
 
 \newcommand{\runninghead}[1]{\renewcommand{\runninghead}{#1}}
+
 \newcommand{\footertext}[1]{\renewcommand{\footertext}{#1}}

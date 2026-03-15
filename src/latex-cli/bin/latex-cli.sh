@@ -2,7 +2,8 @@
 
 # Configuration
 CONFIG_DIR="$HOME/.latex-cli"
-CONFIG_FILE="$CONFIG_DIR/config.yaml"
+LETTER_CONFIG="$CONFIG_DIR/letter.yaml"
+ARTICLE_CONFIG="$CONFIG_DIR/article.yaml"
 TEMPLATES_DIR="$(dirname "$(realpath "$0")")/../templates"
 
 # Colors for output
@@ -11,205 +12,194 @@ GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Ensure config directory exists
 mkdir -p "$CONFIG_DIR"
 
 function usage() {
     echo -e "${BLUE}Usage: latex-cli [command]${NC}"
     echo ""
     echo "Commands:"
-    echo "  init           Initialize local configuration"
-    echo "  new [type] [name] Create a new document (e.g., letter [my_folder])"
+    echo "  init letter    Initialize personal data for letters"
+    echo "  init article   Add authors to the article author pool"
+    echo "  new [type] [name] Create a new document"
     echo "  templates      List available templates"
     echo "  config         Show current configuration"
     exit 1
 }
 
-function get_config_value() {
-    local key=$1
-    if [[ -f "$CONFIG_FILE" ]]; then
-        # Simple extraction for YAML-like format (e.g., name: "Max")
-        grep "$key:" "$CONFIG_FILE" | sed -E 's/.*: "?([^"]*)"?/\1/'
+# Simple helper to get value from our specific YAML format (key: value)
+function get_yaml_val() {
+    local file=$1
+    local key=$2
+    if [[ -f "$file" ]]; then
+        grep "^$key:" "$file" | head -n 1 | sed -E "s/^$key:[[:space:]]*\"?(.*)\"?[[:space:]]*$/\1/" | sed 's/"$//'
     fi
 }
 
-function cmd_init() {
-    echo "Initializing LaTeX CLI configuration..."
+function cmd_init_letter() {
+    echo -e "${BLUE}Initializing Letter Data...${NC}"
     read -p "Name: " name
     read -p "Street: " street
     read -p "City (ZIP + City): " city
     read -p "Phone: " phone
-    read -p "Private Email: " email
+    read -p "Email: " email
     read -p "Business Email: " b_email
-    read -p "Editor (e.g., nano, vim): " editor
-    read -p "LaTeX Engine (e.g., pdflatex, xelatex): " engine
-    read -p "PDF Viewer (e.g., xdg-open, open): " viewer
+    read -p "Editor (e.g. code, nano): " editor
+    read -p "LaTeX Engine: " engine
+    read -p "PDF Viewer: " viewer
 
-    cat <<EOF > "$CONFIG_FILE"
-person:
-  name: "$name"
-  street: "$street"
-  city: "$city"
-  phone: "$phone"
-  email: "$email"
-  business_email: "$b_email"
-
-defaults:
-  editor: "${editor:-nano}"
-  engine: "${engine:-pdflatex}"
-  viewer: "${viewer:-xdg-open}"
-  build: true
+    cat <<EOF > "$LETTER_CONFIG"
+name: "$name"
+street: "$street"
+city: "$city"
+phone: "$phone"
+email: "$email"
+business_email: "$b_email"
+editor: "${editor:-nano}"
+engine: "${engine:-pdflatex}"
+viewer: "${viewer:-xdg-open}"
 EOF
-    echo -e "${GREEN}Config saved to $CONFIG_FILE${NC}"
+    echo -e "${GREEN}Saved to $LETTER_CONFIG${NC}"
 }
 
-function cmd_templates() {
-    echo -e "${BLUE}Available Templates:${NC}"
-    ls -1 "$TEMPLATES_DIR"
+function cmd_init_article() {
+    echo -e "${BLUE}Adding Author to Pool...${NC}"
+    read -p "Name: " a_name
+    read -p "Email: " a_email
+    read -p "Department: " a_dept
+
+    # We store authors in a simple dash-prefixed format
+    cat <<EOF >> "$ARTICLE_CONFIG"
+- name: "$a_name"
+  email: "$a_email"
+  dept: "$a_dept"
+EOF
+    echo -e "${GREEN}Author added to $ARTICLE_CONFIG${NC}"
+}
+
+function cmd_init() {
+    case "$1" in
+        letter) cmd_init_letter ;;
+        article) cmd_init_article ;;
+        *) echo "Usage: latex-cli init [letter|article]"; exit 1 ;;
+    esac
 }
 
 function cmd_new() {
     local type=$1
     local name_arg=$2
-    if [[ -z "$type" ]]; then
-        echo "Error: Please specify a template type (e.g., letter)"
-        exit 1
-    fi
+    if [[ -z "$type" ]]; then usage; fi
 
     local template_dir="$TEMPLATES_DIR/$type"
-    local template_file="$template_dir/$type.tex"
-    if [[ ! -f "$template_file" ]]; then
-        echo -e "${RED}Error: Template '$type' not found in $TEMPLATES_DIR${NC}"
+    if [[ ! -d "$template_dir" ]]; then
+        echo -e "${RED}Error: Template '$type' not found.${NC}"
         exit 1
     fi
 
-    # Read config
-    local name=$(get_config_value "name")
-    local street=$(get_config_value "street")
-    local city=$(get_config_value "city")
-    local phone=$(get_config_value "phone")
-    local email=$(get_config_value "email")
-    local b_email=$(get_config_value "business_email")
-    local engine=$(get_config_value "engine")
-    local viewer=$(get_config_value "viewer")
+    # 1. Target Directory Setup
+    local target_dir="${name_arg:-document_${type}_$(date +%Y-%m-%d_%H-%M)}"
+    mkdir -p "$target_dir"
+    cp -r "$template_dir/." "$target_dir/"
+    local target_file="$target_dir/${type}.tex"
 
-    if [[ -z "$name" ]]; then
-        echo -e "${RED}Error: Config missing. Run 'latex-cli init' first.${NC}"
-        exit 1
-    fi
-
-    # Conditional Prompts
-    local rec_prefix=""
-    local rec_name=""
-    local rec_street=""
-    local rec_city=""
-    local subject=""
-
+    # 2. Logic based on type
     if [[ "$type" == "letter" ]]; then
+        # Load letter config
+        local my_name=$(get_yaml_val "$LETTER_CONFIG" "name")
+        local engine=$(get_yaml_val "$LETTER_CONFIG" "engine")
+        local viewer=$(get_yaml_val "$LETTER_CONFIG" "viewer")
+        local editor=$(get_yaml_val "$LETTER_CONFIG" "editor")
+
         echo -e "${BLUE}Recipient Details:${NC}"
-        read -p "Prefix (Optional, e.g. Company): " rec_prefix
+        read -p "Prefix: " rec_prefix
         read -p "Name: " rec_name
         read -p "Street: " rec_street
         read -p "City: " rec_city
         read -p "Subject: " subject
-    else
-        read -p "Title / Subject: " subject
+
+        [[ -n "$rec_prefix" ]] && rec_prefix="${rec_prefix}\\\\\\"
+
+        # Replace placeholders (Simple sed for letters)
+        sed -i "s/<<NAME>>/$(get_yaml_val "$LETTER_CONFIG" "name")/g" "$target_file"
+        sed -i "s/<<STREET>>/$(get_yaml_val "$LETTER_CONFIG" "street")/g" "$target_file"
+        sed -i "s/<<CITY>>/$(get_yaml_val "$LETTER_CONFIG" "city")/g" "$target_file"
+        sed -i "s/<<PHONE>>/$(get_yaml_val "$LETTER_CONFIG" "phone")/g" "$target_file"
+        sed -i "s/<<EMAIL>>/$(get_yaml_val "$LETTER_CONFIG" "email")/g" "$target_file"
+        sed -i "s/<<BUSINESS_EMAIL>>/$(get_yaml_val "$LETTER_CONFIG" "business_email")/g" "$target_file"
+        sed -i "s/<<BETREFF>>/$subject/g" "$target_file"
+        sed -i "s/<<RECEIVER_PREFIX>>/$rec_prefix/g" "$target_file"
+        sed -i "s/<<RECEIVER_NAME>>/$rec_name/g" "$target_file"
+        sed -i "s/<<RECEIVER_STREET>>/$rec_street/g" "$target_file"
+        sed -i "s/<<RECEIVER_CITY>>/$rec_city/g" "$target_file"
+        sed -i "s/<<TEXT>>/[WRITE CONTENT HERE]/g" "$target_file"
+
+    elif [[ "$type" == "article" ]]; then
+        # Load common defaults from letter_config if available
+        local engine=$(get_yaml_val "$LETTER_CONFIG" "engine")
+        local viewer=$(get_yaml_val "$LETTER_CONFIG" "viewer")
+        local editor=$(get_yaml_val "$LETTER_CONFIG" "editor")
+
+        read -p "Article Title: " subject
+
+        # Selection of Authors
+        if [[ ! -f "$ARTICLE_CONFIG" ]]; then
+            echo -e "${RED}No author pool found. Run 'latex-cli init article' first.${NC}"
+            exit 1
+        fi
+
+        echo -e "\n${BLUE}Select Authors from Pool (comma separated, e.g. 1,3):${NC}"
+        # Parse authors from YAML-ish file
+        local authors_names=($(grep "^- name:" "$ARTICLE_CONFIG" | sed 's/- name: //;s/"//g'))
+        local authors_emails=($(grep "  email:" "$ARTICLE_CONFIG" | sed 's/  email: //;s/"//g'))
+        local authors_depts=($(grep "  dept:" "$ARTICLE_CONFIG" | sed 's/  dept: //;s/"//g'))
+
+        for i in "${!authors_names[@]}"; do
+            echo "$((i+1))) ${authors_names[$i]} (${authors_emails[$i]})"
+        done
+        read -p "Selection: " selection
+
+        local author_block=""
+        local affiliation_block=""
+        local count=1
+
+        IFS=',' read -ra ADDS <<< "$selection"
+        for idx in "${ADDS[@]}"; do
+            local real_idx=$((idx-1))
+            local name="${authors_names[$real_idx]}"
+            local email="${authors_emails[$real_idx]}"
+            local dept="${authors_depts[$real_idx]}"
+
+            [[ $count -gt 1 ]] && author_block+=" \\\\and "
+            author_block+="${name}\\\\textsuperscript{${count}}\\\\\\\\{\\\\small \\\\href{mailto:${email}}{(${email})}}"
+            [[ -n "$dept" ]] && affiliation_block+="\\\\textsuperscript{${count}}${dept}\\\\\\\\"
+            ((count++))
+        done
+
+        # Replace in .tex (using | as delimiter because of backslashes)
+        sed -i "s|<<BETREFF>>|$subject|g" "$target_file"
+        sed -i "s|<<AUTHORS>>|$author_block|g" "$target_file"
+        sed -i "s|<<AFFILIATIONS>>|$affiliation_block|g" "$target_file"
+        sed -i "s|<<TEXT>>|[WRITE CONTENT HERE]|g" "$target_file"
     fi
-
-    # Handle optional prefix (adding LaTeX newline)
-    if [[ -n "$rec_prefix" ]]; then
-        rec_prefix="${rec_prefix}\\\\"
-    fi
-
-    # Create target directory
-    local target_dir=""
-    if [[ -n "$name_arg" ]]; then
-        target_dir="$name_arg"
-    else
-        local date_str=$(date +%Y-%m-%d_%H-%M)
-        target_dir="document_${type}_${date_str}"
-    fi
-    
-    if [[ -d "$target_dir" ]]; then
-        echo -e "${RED}Error: Directory '$target_dir' already exists.${NC}"
-        exit 1
-    fi
-    mkdir -p "$target_dir"
-    
-    local target_file="$target_dir/${type}.tex"
-    local target_makefile="$target_dir/Makefile"
-
-    # Copy ALL files from template directory to target directory
-    cp -r "$template_dir/." "$target_dir/"
-
-    # Replace placeholders in .tex using Python for safety
-    export REC_PREFIX="$rec_prefix"
-    export REC_NAME="$rec_name"
-    export REC_STREET="$rec_street"
-    export REC_CITY="$rec_city"
-    export MY_NAME="$name"
-    export MY_STREET="$street"
-    export MY_CITY="$city"
-    export MY_PHONE="$phone"
-    export MY_EMAIL="$email"
-    export MY_BUSINESS_EMAIL="$b_email"
-    export MY_SUBJECT="$subject"
-
-    python3 -c "
-import os
-content = open('$target_file').read()
-replacements = {
-    '<<NAME>>': os.environ.get('MY_NAME', ''),
-    '<<STREET>>': os.environ.get('MY_STREET', ''),
-    '<<CITY>>': os.environ.get('MY_CITY', ''),
-    '<<PHONE>>': os.environ.get('MY_PHONE', ''),
-    '<<EMAIL>>': os.environ.get('MY_EMAIL', ''),
-    '<<BUSINESS_EMAIL>>': os.environ.get('MY_BUSINESS_EMAIL', ''),
-    '<<BETREFF>>': os.environ.get('MY_SUBJECT', ''),
-    '<<RECEIVER_PREFIX>>': os.environ.get('REC_PREFIX', ''),
-    '<<RECEIVER_NAME>>': os.environ.get('REC_NAME', ''),
-    '<<RECEIVER_STREET>>': os.environ.get('REC_STREET', ''),
-    '<<RECEIVER_CITY>>': os.environ.get('REC_CITY', ''),
-    '<<TEXT>>': '[WRITE CONTENT HERE]'
-}
-for key, value in replacements.items():
-    content = content.replace(key, value)
-with open('$target_file', 'w') as f:
-    f.write(content)
-"
 
     # Replace placeholders in Makefile
-    if [[ -f "$target_makefile" ]]; then
-        sed -i "s/<<ENGINE>>/${engine:-pdflatex}/g" "$target_makefile"
-        sed -i "s/<<TYPE>>/$type/g" "$target_makefile"
-    fi
+    sed -i "s/<<ENGINE>>/${engine:-pdflatex}/g" "$target_dir/Makefile"
+    sed -i "s/<<TYPE>>/$type/g" "$target_dir/Makefile"
 
     echo -e "${GREEN}Created new $type in $target_dir${NC}"
-    
-    # Open editor
-    local editor=$(get_config_value "editor")
     ${editor:-nano} "$target_file"
 
-    # Post-Editor: Ask to build and open
     echo ""
     read -p "Build PDF and open with $viewer? (y/n): " do_build
     if [[ "$do_build" =~ ^([yY][eE][sS]|[yY])$ ]]; then
-        echo -e "${BLUE}Building PDF...${NC}"
         (cd "$target_dir" && make)
-        if [[ -f "$target_dir/${type}.pdf" ]]; then
-            echo -e "${GREEN}Opening PDF...${NC}"
-            ${viewer:-xdg-open} "$target_dir/${type}.pdf" &
-        else
-            echo -e "${RED}Error: PDF build failed.${NC}"
-        fi
+        [[ -f "$target_dir/${type}.pdf" ]] && ${viewer:-xdg-open} "$target_dir/${type}.pdf" &
     fi
 }
 
-# Main routing
 case "$1" in
-    init) cmd_init ;;
-    templates) cmd_templates ;;
+    init) cmd_init "$2" ;;
+    templates) ls -1 "$TEMPLATES_DIR" ;;
     new) cmd_new "$2" "$3" ;;
-    config) cat "$CONFIG_FILE" ;;
+    config) cat "$LETTER_CONFIG" "$ARTICLE_CONFIG" 2>/dev/null ;;
     *) usage ;;
 esac
