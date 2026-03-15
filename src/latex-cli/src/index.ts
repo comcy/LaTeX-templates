@@ -63,8 +63,19 @@ const init = program.command('init').description('Initialize local configuration
 init
   .command('letter')
   .description('Initialize personal data for letters')
-  .action(async () => {
+  .option('--add-person', 'Add or update person details')
+  .action(async (options) => {
     const existing = await loadConfig();
+    if (existing?.person && !options.addPerson) {
+      const { confirm } = await (inquirer.prompt as any)({
+        type: 'confirm',
+        name: 'confirm',
+        message: 'Letter configuration already exists. Update it?',
+        default: false,
+      });
+      if (!confirm) return;
+    }
+
     const questions = [
       { type: 'input', name: 'name', message: 'Name:', default: existing?.person?.name },
       { type: 'input', name: 'street', message: 'Street:', default: existing?.person?.street },
@@ -102,8 +113,30 @@ init
 init
   .command('article')
   .description('Initialize author data for articles')
-  .action(async () => {
+  .option('--add-author', 'Add a co-author to the pool')
+  .action(async (options) => {
     const existing = await loadConfig();
+    
+    if (options.addAuthor) {
+      console.log(chalk.blue('Adding Co-Author to Pool:'));
+      const coAuthor = await (inquirer.prompt as any)([
+        { type: 'input', name: 'name', message: 'Co-Author Name:' },
+        { type: 'input', name: 'email', message: 'Co-Author Email:' },
+        { type: 'input', name: 'department', message: 'Co-Author Department (Optional):' },
+      ]);
+      
+      const config: Config = {
+        ...(existing || { person: {} as any, defaults: {} as any }),
+        article: {
+          main_author: existing?.article?.main_author || { name: existing?.person?.name || '', email: existing?.person?.business_email || '' },
+          co_authors: [...(existing?.article?.co_authors || []), coAuthor],
+        }
+      };
+      await saveConfig(config);
+      console.log(chalk.green('Author added to pool.'));
+      return;
+    }
+
     console.log(chalk.blue('Main Author Details:'));
     const mainAuthor = await (inquirer.prompt as any)([
       { type: 'input', name: 'name', message: 'Name:', default: existing?.article?.main_author?.name || existing?.person?.name },
@@ -111,13 +144,13 @@ init
       { type: 'input', name: 'department', message: 'Department (Optional):', default: existing?.article?.main_author?.department },
     ]);
 
-    const coAuthors: Author[] = [];
+    const coAuthors: Author[] = existing?.article?.co_authors || [];
     let addMore = true;
     while (addMore) {
       const { confirm } = await (inquirer.prompt as any)({
         type: 'confirm',
         name: 'confirm',
-        message: 'Add a persistent Co-Author to config?',
+        message: 'Add a persistent Co-Author to pool?',
         default: false,
       });
       if (!confirm) break;
@@ -193,10 +226,28 @@ program
       const { subject } = await (inquirer.prompt as any)({ type: 'input', name: 'subject', message: 'Article Title:' });
       replacements['<<BETREFF>>'] = subject;
 
-      const authors: Author[] = [];
+      const pool: Author[] = [];
       if (config.article) {
-        authors.push(config.article.main_author);
-        authors.push(...config.article.co_authors);
+        pool.push(config.article.main_author);
+        pool.push(...config.article.co_authors);
+      }
+
+      let selectedAuthors: Author[] = [];
+      if (pool.length > 0) {
+        const { selectedIndices } = await (inquirer.prompt as any)({
+          type: 'checkbox',
+          name: 'selectedIndices',
+          message: 'Select Authors from Pool:',
+          choices: pool.map((auth, i) => ({
+            name: `${auth.name} (${auth.email})`,
+            value: i,
+            checked: i === 0 // Default select main author
+          }))
+        });
+        selectedAuthors = selectedIndices.map((i: number) => pool[i]);
+      } else {
+        console.log(chalk.yellow('No author pool found. Adding main author...'));
+        selectedAuthors.push(config.article?.main_author || { name: config.person?.name || '', email: config.person?.business_email || '' });
       }
 
       let addExtra = true;
@@ -208,17 +259,17 @@ program
           { type: 'input', name: 'email', message: 'Email:' },
           { type: 'input', name: 'department', message: 'Department (Optional):' },
         ]);
-        authors.push(extra);
+        selectedAuthors.push(extra);
       }
 
       // Format LaTeX Author Block
       let authorBlock = "";
       let affiliationBlock = "";
-      authors.forEach((auth, index) => {
+      selectedAuthors.forEach((auth, index) => {
         const i = index + 1;
         authorBlock += `${auth.name}\\textsuperscript{${i}}`;
         authorBlock += `\\\\{\\small \\href{mailto:${auth.email}}{(${auth.email})}}`;
-        if (index < authors.length - 1) authorBlock += " \\and ";
+        if (index < selectedAuthors.length - 1) authorBlock += " \\and ";
         
         if (auth.department) {
           affiliationBlock += `\\textsuperscript{${i}}${auth.department}\\\\`;

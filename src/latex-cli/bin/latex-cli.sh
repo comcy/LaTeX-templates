@@ -36,36 +36,64 @@ function get_yaml_val() {
 }
 
 function cmd_init_letter() {
+    local add_mode=false
+    if [[ "$1" == "--add-person" || "$1" == "--add" ]]; then
+        add_mode=true
+    fi
+
+    if [[ "$add_mode" == "false" && -f "$LETTER_CONFIG" ]]; then
+        read -p "Letter config already exists. Update it? (y/n): " confirm
+        [[ ! "$confirm" =~ ^([yY][eE][sS]|[yY])$ ]] && return
+    fi
+
     echo -e "${BLUE}Initializing Letter Data...${NC}"
-    read -p "Name: " name
-    read -p "Street: " street
-    read -p "City (ZIP + City): " city
-    read -p "Phone: " phone
-    read -p "Email: " email
-    read -p "Business Email: " b_email
-    read -p "Editor (e.g. code, nano): " editor
-    read -p "LaTeX Engine: " engine
-    read -p "PDF Viewer: " viewer
+    read -p "Name [$(get_yaml_val "$LETTER_CONFIG" "name")]: " name
+    read -p "Street [$(get_yaml_val "$LETTER_CONFIG" "street")]: " street
+    read -p "City (ZIP + City) [$(get_yaml_val "$LETTER_CONFIG" "city")]: " city
+    read -p "Phone [$(get_yaml_val "$LETTER_CONFIG" "phone")]: " phone
+    read -p "Email [$(get_yaml_val "$LETTER_CONFIG" "email")]: " email
+    read -p "Business Email [$(get_yaml_val "$LETTER_CONFIG" "business_email")]: " b_email
+    read -p "Editor (e.g. code, nano) [$(get_yaml_val "$LETTER_CONFIG" "editor")]: " editor
+    read -p "LaTeX Engine [$(get_yaml_val "$LETTER_CONFIG" "engine")]: " engine
+    read -p "PDF Viewer [$(get_yaml_val "$LETTER_CONFIG" "viewer")]: " viewer
 
     cat <<EOF > "$LETTER_CONFIG"
-name: "$name"
-street: "$street"
-city: "$city"
-phone: "$phone"
-email: "$email"
-business_email: "$b_email"
-editor: "${editor:-nano}"
-engine: "${engine:-pdflatex}"
-viewer: "${viewer:-xdg-open}"
+name: "${name:-$(get_yaml_val "$LETTER_CONFIG" "name")}"
+street: "${street:-$(get_yaml_val "$LETTER_CONFIG" "street")}"
+city: "${city:-$(get_yaml_val "$LETTER_CONFIG" "city")}"
+phone: "${phone:-$(get_yaml_val "$LETTER_CONFIG" "phone")}"
+email: "${email:-$(get_yaml_val "$LETTER_CONFIG" "email")}"
+business_email: "${b_email:-$(get_yaml_val "$LETTER_CONFIG" "business_email")}"
+editor: "${editor:-${editor:-$(get_yaml_val "$LETTER_CONFIG" "editor"):-nano}}"
+engine: "${engine:-${engine:-$(get_yaml_val "$LETTER_CONFIG" "engine"):-pdflatex}}"
+viewer: "${viewer:-${viewer:-$(get_yaml_val "$LETTER_CONFIG" "viewer"):-xdg-open}}"
 EOF
     echo -e "${GREEN}Saved to $LETTER_CONFIG${NC}"
 }
 
 function cmd_init_article() {
+    local add_mode=false
+    if [[ "$1" == "--add-author" || "$1" == "--add" ]]; then
+        add_mode=true
+    fi
+
+    if [[ "$add_mode" == "false" && -f "$ARTICLE_CONFIG" ]]; then
+        read -p "Article config already exists. Add another author? (y/n): " confirm
+        [[ ! "$confirm" =~ ^([yY][eE][sS]|[yY])$ ]] && return
+    fi
+
     echo -e "${BLUE}Adding Author to Pool...${NC}"
     read -p "Name: " a_name
     read -p "Email: " a_email
     read -p "Department: " a_dept
+
+    # Prevent duplicates by checking name and email
+    if [[ -f "$ARTICLE_CONFIG" ]]; then
+        if grep -q "name: \"$a_name\"" "$ARTICLE_CONFIG" && grep -q "email: \"$a_email\"" "$ARTICLE_CONFIG"; then
+            echo -e "${YELLOW}Author $a_name already exists in pool.${NC}"
+            return
+        fi
+    fi
 
     # We store authors in a simple dash-prefixed format
     cat <<EOF >> "$ARTICLE_CONFIG"
@@ -78,9 +106,15 @@ EOF
 
 function cmd_init() {
     case "$1" in
-        letter) cmd_init_letter ;;
-        article) cmd_init_article ;;
-        *) echo "Usage: latex-cli init [letter|article]"; exit 1 ;;
+        letter) 
+            shift
+            cmd_init_letter "$@" 
+            ;;
+        article) 
+            shift
+            cmd_init_article "$@" 
+            ;;
+        *) echo "Usage: latex-cli init [letter|article] [--add-author|--add-person]"; exit 1 ;;
     esac
 }
 
@@ -147,10 +181,38 @@ function cmd_new() {
         fi
 
         echo -e "\n${BLUE}Select Authors from Pool (comma separated, e.g. 1,3):${NC}"
-        # Parse authors from YAML-ish file
-        local authors_names=($(grep "^- name:" "$ARTICLE_CONFIG" | sed 's/- name: //;s/"//g'))
-        local authors_emails=($(grep "  email:" "$ARTICLE_CONFIG" | sed 's/  email: //;s/"//g'))
-        local authors_depts=($(grep "  dept:" "$ARTICLE_CONFIG" | sed 's/  dept: //;s/"//g'))
+        
+        # Robust parsing of authors from YAML
+        local authors_names=()
+        local authors_emails=()
+        local authors_depts=()
+        
+        local current_name=""
+        local current_email=""
+        local current_dept=""
+
+        while IFS= read -r line; do
+            if [[ "$line" =~ ^-[[:space:]]name:[[:space:]]\"?([^\"]*)\"? ]]; then
+                if [[ -n "$current_name" ]]; then
+                    authors_names+=("$current_name")
+                    authors_emails+=("$current_email")
+                    authors_depts+=("$current_dept")
+                fi
+                current_name="${BASH_REMATCH[1]}"
+                current_email=""
+                current_dept=""
+            elif [[ "$line" =~ ^[[:space:]]+email:[[:space:]]\"?([^\"]*)\"? ]]; then
+                current_email="${BASH_REMATCH[1]}"
+            elif [[ "$line" =~ ^[[:space:]]+dept:[[:space:]]\"?([^\"]*)\"? ]]; then
+                current_dept="${BASH_REMATCH[1]}"
+            fi
+        done < "$ARTICLE_CONFIG"
+        
+        if [[ -n "$current_name" ]]; then
+            authors_names+=("$current_name")
+            authors_emails+=("$current_email")
+            authors_depts+=("$current_dept")
+        fi
 
         for i in "${!authors_names[@]}"; do
             echo "$((i+1))) ${authors_names[$i]} (${authors_emails[$i]})"
@@ -163,7 +225,15 @@ function cmd_new() {
 
         IFS=',' read -ra ADDS <<< "$selection"
         for idx in "${ADDS[@]}"; do
+            # Trim whitespace
+            idx=$(echo "$idx" | xargs)
             local real_idx=$((idx-1))
+            
+            if [[ $real_idx -lt 0 || $real_idx -ge ${#authors_names[@]} ]]; then
+                echo -e "${YELLOW}Warning: Invalid selection $idx. Skipping.${NC}"
+                continue
+            fi
+
             local name="${authors_names[$real_idx]}"
             local email="${authors_emails[$real_idx]}"
             local dept="${authors_depts[$real_idx]}"
