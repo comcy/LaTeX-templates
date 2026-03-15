@@ -1,13 +1,14 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % LaTeX Templates Journal Article
-% Custom "article" Class
+% Custom "customarticle" Class
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{customarticle}[2024/03/14 Custom Article Class]
 
 \usepackage{etoolbox}
-\usepackage{xcolor} % Required for custom colors
+\usepackage{xcolor}
+\usepackage{lastpage} % Required for "Page X of Y"
 
 % Define Dark Gray Color
 \definecolor{darkgray}{HTML}{333333}
@@ -37,10 +38,10 @@
 
 \usepackage[
 	top=2.5cm,
-	bottom=2.5cm,
+	bottom=3cm, % Increased for footer
 	left=2cm,
 	right=2cm,
-	footskip=1cm,
+	footskip=1.5cm,
 	headsep=0.75cm,
 	columnsep=20pt,
 ]{geometry}
@@ -61,18 +62,31 @@
 
 \usepackage{fancyhdr}
 \pagestyle{fancy}
-\renewcommand{\headrulewidth}{0pt}
-\fancyhf{}
 
+\renewcommand{\headrulewidth}{0pt} % No header line
+\renewcommand{\footrulewidth}{0.4pt} % Separator line above footer
+
+\fancyhf{} % Clear all defaults
+
+% Header
 \fancyhead[RO]{\small\textit{\runninghead}}
 \fancyhead[LE]{\small\textit{\runninghead}}
-\fancyfoot[RO]{\small\textbf{\thepage}}
-\fancyfoot[LO]{\footnotesize\footertext}
-\fancyfoot[LE]{\small\textbf{\thepage}}
-\fancyfoot[RE]{\footnotesize\footertext}
+
+% Footer: "Seite X / Y" on the right for all pages
+\fancyfoot[R]{\small Seite \thepage\ / \pageref{LastPage}}
+\fancyfoot[L]{\footnotesize\footertext}
+
+% Ensure the first page also has the footer
+\fpagestyle{plain}{
+	\fancyhf{}
+	\renewcommand{\headrulewidth}{0pt}
+	\renewcommand{\footrulewidth}{0.4pt}
+	\fancyfoot[R]{\small Seite \thepage\ / \pageref{LastPage}}
+	\fancyfoot[L]{\footnotesize\footertext}
+}
 
 %----------------------------------------------------------------------------------------
-%	SECTIONS (With Dark Gray Coloring)
+%	SECTIONS
 %----------------------------------------------------------------------------------------
 
 \usepackage{titlesec}
@@ -86,7 +100,7 @@
 \titleformat
 	{\section}
 	[block]
-	{\Large\bfseries\centering\color{darkgray}} % Applied darkgray
+	{\Large\bfseries\centering\color{darkgray}}
 	{\thesection}
 	{0.5em}
 	{}
@@ -95,7 +109,7 @@
 \titleformat
 	{\subsection}
 	[block]
-	{\raggedright\large\bfseries\color{darkgray}} % Applied darkgray
+	{\raggedright\large\bfseries\color{darkgray}}
 	{\thesubsection}
 	{0.5em}
 	{}
@@ -104,7 +118,7 @@
 \titleformat
 	{\subsubsection}
 	[runin]
-	{\bfseries\color{darkgray}} % Applied darkgray
+	{\bfseries\color{darkgray}}
 	{}
 	{5pt}
 	{}
@@ -113,29 +127,30 @@
 \titlespacing*{\subsubsection}{0pt}{0.5\baselineskip}{8pt}
 
 %----------------------------------------------------------------------------------------
-%	TITLE SECTION (With Dark Gray Coloring)
+%	TITLE SECTION
 %----------------------------------------------------------------------------------------
 
 \usepackage{titling}
 
 \setlength{\droptitle}{-4\baselineskip}
 
-\pretitle{\begin{center}\huge\bfseries\color{darkgray}} % Applied darkgray
+\pretitle{\begin{center}\huge\bfseries\color{darkgray}}
 \posttitle{\end{center}}
 
 \setlength{\thanksmarkwidth}{3pt}
 \setlength{\thanksmargin}{-3pt}
 
-\patchcmd{\maketitle}{plain}{empty}{}{}
+% Prevent \maketitle from resetting the page style
+\patchcmd{\maketitle}{\thispagestyle{plain}}{}{}{}
 
 %----------------------------------------------------------------------------------------
-%	ABSTRACT CUSTOMIZATION (With Dark Gray Coloring)
+%	ABSTRACT CUSTOMIZATION
 %----------------------------------------------------------------------------------------
 
 \usepackage{abstract}
 
-\renewcommand{\abstractnamefont}{\normalfont\bfseries\vspace{0.5\baselineskip}\color{darkgray}} % Applied darkgray to "Abstract" label
-\renewcommand{\abstracttextfont}{\vspace{-0.5\baselineskip}\normalfont\small\itshape\color{darkgray}} % Applied darkgray to Abstract text
+\renewcommand{\abstractnamefont}{\normalfont\bfseries\vspace{0.5\baselineskip}\color{darkgray}}
+\renewcommand{\abstracttextfont}{\vspace{-0.5\baselineskip}\normalfont\small\itshape\color{darkgray}}
 
 %----------------------------------------------------------------------------------------
 %	BIBLIOGRAPHY
@@ -191,4 +206,4 @@
 %----------------------------------------------------------------------------------------
 
 \newcommand{\runninghead}[1]{\renewcommand{\runninghead}{#1}}
-\newcommand{\footertext}[1]{\renewcommand{\footertext}{1}}
+\newcommand{\footertext}[1]{\renewcommand{\footertext}{#1}}
