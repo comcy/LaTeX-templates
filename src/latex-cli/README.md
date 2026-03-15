@@ -1,88 +1,63 @@
 # LaTeX CLI
 
-Ein flexibles CLI-Tool zur schnellen Erzeugung von LaTeX-Dokumenten (Briefe, Artikel, Rechnungen) basierend auf personalisierten Templates.
+Ein flexibles CLI-Tool zur schnellen Erzeugung von LaTeX-Dokumenten (Briefe, wissenschaftliche Artikel) basierend auf personalisierten Templates und einem dynamischen Autoren-System.
 
 ## Features
 
-- **Zweigleisige Architektur:** Läuft als performantes TypeScript-Tool (Node.js) oder als leichtgewichtiges Bash-Skript (Fallback).
-- **Zentrale Config:** Einmal Name, Adresse und bevorzugte LaTeX-Engine in `~/.latex-cli/config.yaml` hinterlegen.
-- **Einfache Templates:** Platzhalter wie `<<NAME>>` oder `<<EMPFAENGER>>` werden automatisch ersetzt.
-- **Automatischer Build:** Jedes Projekt kommt mit einem vorkonfigurierten `Makefile`.
+- **Zweigleisige Architektur:** Läuft als Node.js/TypeScript-Tool oder als komplett abhängigkeitsfreies Bash-Skript.
+- **Getrennte Konfigurationen:** Eigene YAML-Dateien für Briefdaten und einen Pool von Autoren für Artikel.
+- **Wissenschaftliche Artikel:** Unterstützung für mehrere Autoren, Abteilungen, automatische Bibliographie (Biber) und Abbildungsverzeichnisse.
+- **Automatischer Workflow:** Projekt anlegen, im Editor öffnen, PDF bauen und im Viewer anzeigen – alles in einem Rutsch.
 
 ## 1. Installation
 
-Du kannst das Tool mit einem einzigen Befehl installieren. Der Installer lädt das Repository herunter und richtet alles ein.
-
-### One-Line Install (Empfohlen)
+Nutze den One-Line Installer, um das Tool und alle Templates einzurichten:
 
 ```bash
 curl -sL https://raw.githubusercontent.com/comcy/LaTeX-templates/master/src/latex-cli/install.sh | bash
 ```
 
-### Manuelle Installation (Lokales Repository)
-
-Wenn du das Repository bereits geklont hast:
-```bash
-./install.sh
-```
-
-**Hinweis:** Stelle sicher, dass `~/.local/bin` in deinem `$PATH` enthalten ist.
+*Der Installer fragt dich, welche Version (Bash oder TypeScript) du bevorzugst und hilft dir beim Einrichten des PATHs.*
 
 ## 2. Usage
 
 ### Initialisierung
-Bevor du das Tool nutzt, musst du deine persönlichen Daten hinterlegen:
+Konfiguriere deine Daten (einmalig oder zum Aktualisieren):
 ```bash
-latex-cli init
+# Für Briefe (Name, Adresse, etc.)
+latex-cli init letter
+
+# Für Artikel (Füge Autoren zu deinem Pool hinzu)
+latex-cli init article
 ```
 
 ### Neues Dokument erstellen
-Erstelle einen neuen Brief oder ein anderes Dokument:
 ```bash
-latex-cli new letter
-```
-Das Tool fragt dich nach dem Empfänger und dem Betreff, erstellt einen neuen Ordner und öffnet deinen bevorzugten Editor.
+# Einen Brief erstellen
+latex-cli new letter mein_brief
 
-### Templates anzeigen
-```bash
-latex-cli templates
+# Einen Artikel erstellen (lässt dich Autoren aus dem Pool wählen)
+latex-cli new article mein_forschungspapier
 ```
 
 ### PDF erzeugen
-In dem neu erstellten Dokumenten-Ordner kannst du einfach `make` ausführen:
+In jedem Projektordner kannst du manuell bauen oder den automatischen Prompt nach dem Bearbeiten nutzen:
 ```bash
-cd document_letter_2026-03-14
 make
 ```
+*Hinweis: Für Artikel wird `biber` zur Verarbeitung der Bibliographie benötigt.*
 
 ## 3. Development
 
-Das Projekt ist so aufgebaut, dass es leicht erweitert werden kann.
+- `bin/`: Pure Bash Implementierung (nutzt `sed`/`grep` statt Python/Node).
+- `src/`: TypeScript Implementierung.
+- `templates/`: LaTeX Vorlagen. Neue Vorlagen einfach als Ordner mit einer `.tex` Datei und einem `Makefile` hinzufügen.
 
-### Struktur
-- `bin/`: Enthält das Bash-CLI (`latex-cli.sh`).
-- `src/`: Enthält den TypeScript-Quellcode.
-- `templates/`: Hier liegen die Ordner für die verschiedenen Dokumenttypen.
-
-### Neue Templates hinzufügen
-1. Erstelle einen neuen Ordner unter `templates/my-template`.
-2. Füge eine `my-template.tex` Datei hinzu.
-3. Nutze Platzhalter wie `<<NAME>>`, `<<STREET>>`, `<<CITY>>`, `<<PHONE>>`, `<<EMAIL>>`, `<<BETREFF>>`, `<<EMPFAENGER>>`.
-4. Kopiere das `Makefile` aus dem `letter` Template und passe es ggf. an.
-
-### TypeScript Version entwickeln
-Wenn du Node.js installiert hast, kannst du Änderungen am TS-Code wie folgt testen:
-
+### TypeScript Version bauen
 ```bash
-# Abhängigkeiten installieren
 npm install
-
-# Build ausführen
 npm run build
-
-# Lokal testen
-node dist/index.js templates
 ```
 
-### Bash Version entwickeln
-Änderungen direkt in `bin/latex-cli.sh` vornehmen. Da es keine Kompilierung benötigt, sind Änderungen sofort nach dem Speichern wirksam.
+## Lizenz
+Dieses Projekt ist Teil der [comcy/LaTeX-templates](https://github.com/comcy/LaTeX-templates) Sammlung.
