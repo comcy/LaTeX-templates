@@ -72,11 +72,11 @@
 \fancyhead[RO]{\small\textit{\runninghead}}
 \fancyhead[LE]{\small\textit{\runninghead}}
 
-% Footer: "Seite X / Y" on the right for all pages
-\fancyfoot[R]{\small Seite \thepage\ / \pageref{LastPage}}
-\fancyfoot[L]{\footnotesize\footertext}
+% Footer: Alternating positions for twoside documents
+\fancyfoot[RO,LE]{\small Seite \thepage\ / \pageref{LastPage}}
+\fancyfoot[LO,RE]{\footnotesize\footertext}
 
-% Ensure the first page also has the footer
+% Ensure the first page (usually odd) also has the footer on the right
 \fancypagestyle{plain}{
 	\fancyhf{}
 	\renewcommand{\headrulewidth}{0pt}
@@ -205,6 +205,8 @@
 %	CUSTOM COMMANDS
 %----------------------------------------------------------------------------------------
 
-\newcommand{\runninghead}[1]{\renewcommand{\runninghead}{#1}}
+\newcommand{\runninghead}[1]{\def\runninghead{#1}}
+\def\runninghead{} % Initialize empty
 
-\newcommand{\footertext}[1]{\renewcommand{\footertext}{#1}}
+\newcommand{\footertext}[1]{\def\footertext{#1}}
+\def\footertext{} % Initialize empty
