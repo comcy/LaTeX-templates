@@ -1,4 +1,8 @@
+![LaTeX CLI](latex-cli-logo.png)
 # LaTeX CLI
+
+
+
 
 Ein flexibles CLI-Tool zur schnellen Erzeugung von LaTeX-Dokumenten (Briefe, wissenschaftliche Artikel) basierend auf personalisierten Templates und einem dynamischen Autoren-System.
 
