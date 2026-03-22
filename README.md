@@ -54,4 +54,8 @@ make
 - `templates/`: LaTeX templates. Simply add new templates as a folder containing a `.tex` file and a `Makefile`.
 
 ## License
-This project is part of the [comcy/LaTeX-templates](https://github.com/comcy/LaTeX-templates) collection.
+This project is part of the [comcy/LaTeX-CLI](https://github.com/comcy/LaTeX-CLI) collection.
+
+The collection is licensed under MIT License.
+
+Copyright (c) 2026 Christian Silfang
