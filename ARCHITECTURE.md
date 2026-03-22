@@ -2,7 +2,7 @@ Projektname: latex-cli
 Ziele:
 
 - CLI Tool für verschiedene Dokumentarten 
-- Zweigleisige Architektur (TypeScript & Pure Bash)
+- Leichtgewichtige Bash-Architektur
 - Templates im Repo, persönliche Daten lokal in getrennten Configs
 - Dynamische Autorenverwaltung für wissenschaftliche Artikel
 - Automatisierter Build-Prozess mit Makefile und PDF-Viewer Integration
@@ -11,7 +11,7 @@ Ziele:
 
 Trennung von drei Komponenten:
 
-1. **CLI Tool**: Erzeugt Projekte aus Templates (Bash oder Node.js).
+1. **CLI Tool**: Erzeugt Projekte aus Templates (Bash).
 2. **Templates**: LaTeX Vorlagen (Briefe, Artikel etc.) inkl. Assets.
 3. **Lokale Config**: Getrennte YAML-Dateien für verschiedene Anwendungsfälle.
 
@@ -19,13 +19,14 @@ Trennung von drei Komponenten:
 
 ### Repo:
 ```txt
-latex-cli
+LaTeX-templates/
 │
 ├── bin/latex-cli.sh      # Pure Bash Version (Zero-Dependencies)
-├── src/index.ts          # TypeScript Version
 ├── templates/
+│   ├── article/          # Artikel-Template mit bib/ und Figures/
+│   ├── assignments/      # Aufgaben-Template
 │   ├── letter/           # Brief-Template
-│   └── article/          # Artikel-Template mit bib/ und Figures/
+│   └── ...               # Weitere Templates
 └── install.sh            # Universal Installer
 ```
 

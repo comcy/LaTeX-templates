@@ -4,7 +4,6 @@ set -e
 
 # --- Configuration ---
 REPO_URL="https://github.com/comcy/LaTeX-templates.git"
-SUB_DIR="src/latex-cli"
 CONFIG_DIR="$HOME/.latex-cli"
 REPO_DEST="$CONFIG_DIR/src-repo"
 BIN_DIR="$HOME/.local/bin"
@@ -34,63 +33,23 @@ else
     else
         git clone "$REPO_URL" "$REPO_DEST" --quiet
     fi
-    # In a monorepo, the actual tool is in a subfolder
-    REPO_DIR="$REPO_DEST/$SUB_DIR"
+    REPO_DIR="$REPO_DEST"
 fi
 
 # 2. Ensure directories exist
 mkdir -p "$CONFIG_DIR"
 mkdir -p "$BIN_DIR"
 
-# 3. Link templates
+# 3. Link templates (for reference, though script uses relative paths)
 echo "Linking templates..."
-# Remove existing symlink or directory to prevent nested "templates/templates"
 rm -rf "$CONFIG_DIR/templates"
 ln -sf "$REPO_DIR/templates" "$CONFIG_DIR/templates"
 
-# 4. Ask user for version preference
-echo -e "\nWhich version would you like to install?"
-echo -e "1) ${BLUE}TypeScript (Node.js)${NC} - Feature-rich, interactive prompts"
-echo -e "2) ${BLUE}Bash${NC}            - Lightweight, zero dependencies"
-# Added < /dev/tty to capture input when run via curl | bash
-read -p "Selection [1-2]: " version_choice < /dev/tty
+# 4. Link binary to ~/.local/bin
+ln -sf "$REPO_DIR/bin/latex-cli.sh" "$BIN_DEST"
+chmod +x "$REPO_DIR/bin/latex-cli.sh"
+echo -e "${GREEN}Bash version installed as 'latex-cli'${NC}"
 
-USE_NODE=false
-
-if [ "$version_choice" == "1" ]; then
-    if command -v node >/dev/null 2>&1; then
-        echo -e "${GREEN}Node.js detected. Preparing TypeScript version...${NC}"
-        cd "$REPO_DIR"
-        
-        # Using --no-audit for speed and --quiet to reduce noise
-        if npm install --quiet && npm run build --quiet; then
-            if [[ -f "dist/index.js" ]]; then
-                USE_NODE=true
-            else
-                echo -e "${RED}Build output (dist/index.js) not found.${NC}"
-            fi
-        else
-            echo -e "${RED}Build failed.${NC}"
-        fi
-    else
-        echo -e "${RED}Error: Node.js not found. Cannot install TypeScript version.${NC}"
-        echo -e "Falling back to Bash version..."
-    fi
-fi
-
-# 5. Link binary to ~/.local/bin
-if [ "$USE_NODE" = true ]; then
-    # Create a wrapper for the Node version
-    cat <<EOF > "$BIN_DEST"
-#!/bin/bash
-node "$REPO_DIR/dist/index.js" "\$@"
-EOF
-    chmod +x "$BIN_DEST"
-    echo -e "${GREEN}TypeScript version installed as 'latex-cli'${NC}"
-else
-    ln -sf "$REPO_DIR/bin/latex-cli.sh" "$BIN_DEST"
-    echo -e "${GREEN}Bash version installed as 'latex-cli'${NC}"
-fi
 
 echo -e "\n${GREEN}Installation complete!${NC}"
 echo -e "1. Run ${BLUE}latex-cli init${NC} to configure your personal data."

@@ -1,31 +1,57 @@
-# LaTeX-templates
+![LaTeX CLI](latex-cli-logo.png)
 
-A collection of private LaTeX and KOMA-script templates.
+# LaTeX CLI
+A flexible CLI tool for quickly generating LaTeX documents (letters, scientific articles) based on personalized templates and a dynamic author system.
 
-## Usage
+## Features
 
-To prevent storing sensitive information in the public repository and to improve the ease of
-usage the provided templates here you can refer to the `*.config.example.tex` files.
+- **Lightweight Architecture:** Completely dependency-free Bash script.
+- **Separate Configurations:** Dedicated YAML files for personal letter data and a pool of authors for scientific articles.
+- **Scientific Articles:** Support for multiple authors, departments, automatic bibliography (Biber), and lists of figures.
+- **Automated Workflow:** Create projects, open in your editor, build PDFs, and view them—all in one go.
 
-Those files can be renamed to `*.config.tex` files and then can be used to provide your custom data.
+## 1. Installation
 
-The same procedure can be applied for logos or any other images.
+Use the one-line installer to set up the tool and all templates:
 
-The `config.tex` file is also declared in the `.gitignore` file.
+```bash
+curl -sL https://raw.githubusercontent.com/comcy/LaTeX-templates/master/install.sh | bash
+```
 
-## Paradigma
+*The installer will help you set up your PATH if necessary.*
 
-Templates itself are stored under `src` folders.
-Logos and images (and any other assets) are stored under `assets` folders.
-In some cases options or even the pre-amble is outsourced. Those files are stored under the `opts` folder.
+## 2. Usage
 
-## Samples
+### Initialization
+Configure your data (one-time setup or update):
+```bash
+# For letters (name, address, etc.)
+latex-cli init letter
 
-Samples, mainly generated PDF files are stored in the `samples/` folder.
-This is just to give a quick overview of the generated file types.
+# For articles (add authors to your pool)
+latex-cli init article
+```
 
-## References
+### Create a New Document
+```bash
+# Create a letter
+latex-cli new letter my_letter
 
-### KOMA Script
+# Create an article (allows selecting authors from the pool)
+latex-cli new article my_research_paper
+```
 
-- [KOMA Script Documentation (DE)](https://ftp.rrze.uni-erlangen.de/ctan/macros/latex/contrib/koma-script/doc/scrguide-de.pdf)
+### Generate PDF
+In any project folder, you can build manually or use the automatic prompt after editing:
+```bash
+make
+```
+*Note: Articles require `biber` for bibliography processing.*
+
+## 3. Development
+
+- `bin/`: Pure Bash implementation (uses `sed`/`grep` instead of Python/Node).
+- `templates/`: LaTeX templates. Simply add new templates as a folder containing a `.tex` file and a `Makefile`.
+
+## License
+This project is part of the [comcy/LaTeX-templates](https://github.com/comcy/LaTeX-templates) collection.
