@@ -18,20 +18,36 @@ function usage() {
     echo -e "${BLUE}Usage: latex-cli [command]${NC}"
     echo ""
     echo "Commands:"
-    echo "  init letter    Initialize personal data for letters"
-    echo "  init article   Add authors to the article author pool"
+    echo "  init letter      Initialize personal data for letters"
+    echo "  init article     Add authors to the article author pool"
+    echo "  setup-container  Build the Podman/Docker image for builds"
     echo "  new [type] [name] Create a new document"
-    echo "  templates      List available templates"
-    echo "  config         Show current configuration"
+    echo "  templates        List available templates"
+    echo "  config           Show current configuration"
     exit 1
 }
 
-# Simple helper to get value from our specific YAML format (key: value)
-function get_yaml_val() {
-    local file=$1
-    local key=$2
-    if [[ -f "$file" ]]; then
-        grep "^$key:" "$file" | head -n 1 | sed -E "s/^$key:[[:space:]]*\"?(.*)\"?[[:space:]]*$/\1/" | sed 's/"$//'
+function get_container_engine() {
+    if command -v podman >/dev/null 2>&1; then
+        echo "podman"
+    elif command -v docker >/dev/null 2>&1; then
+        echo "docker"
+    fi
+}
+
+function cmd_setup_container() {
+    local engine=$(get_container_engine)
+    if [[ -z "$engine" ]]; then
+        echo -e "${RED}Error: Neither podman nor docker found.${NC}"
+        exit 1
+    fi
+    echo -e "${BLUE}Building container image using $engine...${NC}"
+    local root_dir="$(dirname "$(realpath "$0")")/.."
+    if $engine build -t latex-cli-image "$root_dir"; then
+        echo -e "${GREEN}Container image 'latex-cli-image' is ready.${NC}"
+    else
+        echo -e "${RED}Error: Build failed. Please check the logs above.${NC}"
+        exit 1
     fi
 }
 
@@ -56,6 +72,7 @@ function cmd_init_letter() {
     read -p "Editor (e.g. code, nano) [$(get_yaml_val "$LETTER_CONFIG" "editor")]: " editor
     read -p "LaTeX Engine [$(get_yaml_val "$LETTER_CONFIG" "engine")]: " engine
     read -p "PDF Viewer [$(get_yaml_val "$LETTER_CONFIG" "viewer")]: " viewer
+    read -p "Use Container for builds? (y/n) [$(get_yaml_val "$LETTER_CONFIG" "use_container")]: " use_cont
 
     cat <<EOF > "$LETTER_CONFIG"
 name: "${name:-$(get_yaml_val "$LETTER_CONFIG" "name")}"
@@ -67,55 +84,9 @@ business_email: "${b_email:-$(get_yaml_val "$LETTER_CONFIG" "business_email")}"
 editor: "${editor:-${editor:-$(get_yaml_val "$LETTER_CONFIG" "editor"):-nano}}"
 engine: "${engine:-${engine:-$(get_yaml_val "$LETTER_CONFIG" "engine"):-pdflatex}}"
 viewer: "${viewer:-${viewer:-$(get_yaml_val "$LETTER_CONFIG" "viewer"):-xdg-open}}"
+use_container: "${use_cont:-$(get_yaml_val "$LETTER_CONFIG" "use_container"):-n}"
 EOF
     echo -e "${GREEN}Saved to $LETTER_CONFIG${NC}"
-}
-
-function cmd_init_article() {
-    local add_mode=false
-    if [[ "$1" == "--add-author" || "$1" == "--add" ]]; then
-        add_mode=true
-    fi
-
-    if [[ "$add_mode" == "false" && -f "$ARTICLE_CONFIG" ]]; then
-        read -p "Article config already exists. Add another author? (y/n): " confirm
-        [[ ! "$confirm" =~ ^([yY][eE][sS]|[yY])$ ]] && return
-    fi
-
-    echo -e "${BLUE}Adding Author to Pool...${NC}"
-    read -p "Name: " a_name
-    read -p "Email: " a_email
-    read -p "Department: " a_dept
-
-    # Prevent duplicates by checking name and email
-    if [[ -f "$ARTICLE_CONFIG" ]]; then
-        if grep -q "name: \"$a_name\"" "$ARTICLE_CONFIG" && grep -q "email: \"$a_email\"" "$ARTICLE_CONFIG"; then
-            echo -e "${YELLOW}Author $a_name already exists in pool.${NC}"
-            return
-        fi
-    fi
-
-    # We store authors in a simple dash-prefixed format
-    cat <<EOF >> "$ARTICLE_CONFIG"
-- name: "$a_name"
-  email: "$a_email"
-  dept: "$a_dept"
-EOF
-    echo -e "${GREEN}Author added to $ARTICLE_CONFIG${NC}"
-}
-
-function cmd_init() {
-    case "$1" in
-        letter) 
-            shift
-            cmd_init_letter "$@" 
-            ;;
-        article) 
-            shift
-            cmd_init_article "$@" 
-            ;;
-        *) echo "Usage: latex-cli init [letter|article] [--add-author|--add-person]"; exit 1 ;;
-    esac
 }
 
 function cmd_new() {
@@ -142,6 +113,7 @@ function cmd_new() {
         local engine=$(get_yaml_val "$LETTER_CONFIG" "engine")
         local viewer=$(get_yaml_val "$LETTER_CONFIG" "viewer")
         local editor=$(get_yaml_val "$LETTER_CONFIG" "editor")
+        local use_container=$(get_yaml_val "$LETTER_CONFIG" "use_container")
 
         echo -e "${BLUE}Recipient Details:${NC}"
         read -p "Prefix: " rec_prefix
@@ -171,6 +143,7 @@ function cmd_new() {
         local engine=$(get_yaml_val "$LETTER_CONFIG" "engine")
         local viewer=$(get_yaml_val "$LETTER_CONFIG" "viewer")
         local editor=$(get_yaml_val "$LETTER_CONFIG" "editor")
+        local use_container=$(get_yaml_val "$LETTER_CONFIG" "use_container")
 
         read -p "Article Title: " subject
 
@@ -259,15 +232,22 @@ function cmd_new() {
     ${editor:-nano} "$target_file"
 
     echo ""
-    read -p "Build PDF and open with $viewer? (y/n): " do_build
+    read -p "Build PDF? (y/n): " do_build
     if [[ "$do_build" =~ ^([yY][eE][sS]|[yY])$ ]]; then
-        (cd "$target_dir" && make)
+        if [[ "$use_container" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+            local container_engine=$(get_container_engine)
+            echo -e "${BLUE}Building in container using $container_engine...${NC}"
+            $container_engine run --rm -v "$(pwd)/$target_dir:/workspace:Z" latex-cli-image
+        else
+            (cd "$target_dir" && make)
+        fi
         [[ -f "$target_dir/${type}.pdf" ]] && ${viewer:-xdg-open} "$target_dir/${type}.pdf" &
     fi
 }
 
 case "$1" in
     init) cmd_init "$2" ;;
+    setup-container) cmd_setup_container ;;
     templates) ls -1 "$TEMPLATES_DIR" ;;
     new) cmd_new "$2" "$3" ;;
     config) cat "$LETTER_CONFIG" "$ARTICLE_CONFIG" 2>/dev/null ;;

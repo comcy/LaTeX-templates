@@ -50,6 +50,22 @@ ln -sf "$REPO_DIR/bin/latex-cli.sh" "$BIN_DEST"
 chmod +x "$REPO_DIR/bin/latex-cli.sh"
 echo -e "${GREEN}Bash version installed as 'latex-cli'${NC}"
 
+# 5. Container Setup Question
+echo -e "\n${BLUE}--- Container Support ---${NC}"
+if command -v podman >/dev/null 2>&1 || command -v docker >/dev/null 2>&1; then
+    echo -e "A container engine (Podman/Docker) was detected."
+    echo -e "Would you like to build the LaTeX container image now? (y/n)"
+    echo -e "${YELLOW}(This avoids a local 5GB+ TeX Live installation and is license-safe)${NC}"
+    read -r build_container < /dev/tty
+    if [[ "$build_container" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+        "$BIN_DEST" setup-container
+    else
+        echo -e "Skipping container build. You can run ${BLUE}latex-cli setup-container${NC} later."
+    fi
+else
+    echo -e "${YELLOW}No Podman or Docker found. Skipping container setup.${NC}"
+    echo -e "Install Podman to use the license-safe container solution later."
+fi
 
 echo -e "\n${GREEN}Installation complete!${NC}"
 echo -e "1. Run ${BLUE}latex-cli init${NC} to configure your personal data."
